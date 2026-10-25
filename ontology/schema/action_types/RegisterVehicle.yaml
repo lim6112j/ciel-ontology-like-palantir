@@ -1,0 +1,42 @@
+apiName: RegisterVehicle
+displayName: 차량 등록
+description: 신규 배송차량을 등록한다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  plateNo:
+    apiName: plateNo
+    type: string
+    displayName: 차량번호
+  vehicleType:
+    apiName: vehicleType
+    type: enum
+    values: [1톤탑차, 1.4톤탑차, 2.5톤탑차, 5톤윙바디]
+    displayName: 차종
+  capacityCases:
+    apiName: capacityCases
+    type: integer
+    displayName: 적재케이스
+  capacityWeightKg:
+    apiName: capacityWeightKg
+    type: integer
+    displayName: 적재중량(kg)
+  depot:
+    apiName: depot
+    type: objectRef
+    objectType: Depot
+    displayName: 소속창고
+validators:
+  - field: capacityCases
+    rule: range
+    value: {min: 1, max: 5000}
+rules:
+  - type: createObject
+    objectType: Vehicle
+    properties:
+      plateNo: {param: plateNo}
+      vehicleType: {param: vehicleType}
+      capacityCases: {param: capacityCases}
+      capacityWeightKg: {param: capacityWeightKg}
+      depotRid: {param: depot}
+      status: {literal: available}

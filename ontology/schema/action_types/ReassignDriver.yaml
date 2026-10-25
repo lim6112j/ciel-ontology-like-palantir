@@ -1,0 +1,30 @@
+apiName: ReassignDriver
+displayName: 기사 재배정
+description: 배송의 담당 기사·차량을 교체한다.
+agentProposable: true
+allowedRoles: [dispatcher, manager, agent]
+parameters:
+  delivery:
+    apiName: delivery
+    type: objectRef
+    objectType: Delivery
+    displayName: 배송
+  driver:
+    apiName: driver
+    type: objectRef
+    objectType: Driver
+    displayName: 새기사
+  vehicle:
+    apiName: vehicle
+    type: objectRef
+    objectType: Vehicle
+    displayName: 새차량
+    required: false
+  reason:
+    apiName: reason
+    type: text
+    displayName: 사유
+    required: false
+rules:
+  - type: runFunction
+    function: reassignDriver

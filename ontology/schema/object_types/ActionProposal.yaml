@@ -1,0 +1,97 @@
+apiName: ActionProposal
+displayName: 액션제안
+pluralDisplayName: 액션제안
+description: 에이전트가 제안한 액션. 운영자 승인 전에는 어떤 객체도 변경되지 않는다.
+primaryKey: proposalNo
+internal: true
+properties:
+  proposalNo:
+    apiName: proposalNo
+    displayName: 제안번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  actionType:
+    apiName: actionType
+    displayName: 액션
+    type: string
+    required: true
+    indexed: true
+    maxLength: 96
+  params:
+    apiName: params
+    displayName: 파라미터
+    type: json
+    required: true
+  rationale:
+    apiName: rationale
+    displayName: 제안근거
+    type: text
+    required: true
+  confidence:
+    apiName: confidence
+    displayName: 신뢰도
+    type: decimal
+    min: 0
+    max: 1
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [proposed, approved, rejected, expired, failed]
+    required: true
+    indexed: true
+    defaultValue: proposed
+  violations:
+    apiName: violations
+    displayName: 사전검증결과
+    type: json
+  targetObjectType:
+    apiName: targetObjectType
+    displayName: 대상타입
+    type: string
+    indexed: true
+    maxLength: 64
+  targetRid:
+    apiName: targetRid
+    displayName: 대상객체
+    type: string
+    indexed: true
+    maxLength: 96
+  agentRunRid:
+    apiName: agentRunRid
+    displayName: 에이전트실행
+    type: objectRef
+    objectType: AgentRun
+    indexed: true
+  approvedBy:
+    apiName: approvedBy
+    displayName: 승인자
+    type: string
+    maxLength: 128
+  approvedAt:
+    apiName: approvedAt
+    displayName: 승인시각
+    type: timestamp
+  decidedAt:
+    apiName: decidedAt
+    displayName: 결정시각
+    type: timestamp
+  resultingRunId:
+    apiName: resultingRunId
+    displayName: 실행기록ID
+    type: string
+    maxLength: 64
+  feedbackNote:
+    apiName: feedbackNote
+    displayName: 피드백
+    type: text
+stateMachine:
+  property: status
+  initial: proposed
+  transitions:
+    - {from: proposed, to: approved}
+    - {from: proposed, to: rejected}
+    - {from: proposed, to: expired}
+    - {from: approved, to: failed}

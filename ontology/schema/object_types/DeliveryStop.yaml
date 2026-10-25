@@ -1,0 +1,83 @@
+apiName: DeliveryStop
+displayName: 납품처
+pluralDisplayName: 납품처
+description: 배송의 개별 정류장. 한 정류장이 여러 발주를 처리할 수 있다.
+primaryKey: stopNo
+properties:
+  stopNo:
+    apiName: stopNo
+    displayName: 정류장번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  sequence:
+    apiName: sequence
+    displayName: 순번
+    type: integer
+    required: true
+    min: 1
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [planned, arrived, completed, failed]
+    required: true
+    indexed: true
+    defaultValue: planned
+  plannedAt:
+    apiName: plannedAt
+    displayName: 계획도착
+    type: timestamp
+  arrivedAt:
+    apiName: arrivedAt
+    displayName: 실제도착
+    type: timestamp
+  completedAt:
+    apiName: completedAt
+    displayName: 완료시각
+    type: timestamp
+  plannedCases:
+    apiName: plannedCases
+    displayName: 계획케이스
+    type: integer
+    min: 0
+  actualCases:
+    apiName: actualCases
+    displayName: 실제케이스
+    type: integer
+    min: 0
+  failureReason:
+    apiName: failureReason
+    displayName: 실패사유
+    type: enum
+    values: [영업중아님, 재고없음, 거래처요청, 차량문제, 주소오류, 기타]
+  failureNote:
+    apiName: failureNote
+    displayName: 실패상세
+    type: text
+  outletRid:
+    apiName: outletRid
+    displayName: 거래처
+    type: objectRef
+    objectType: Outlet
+    required: true
+    indexed: true
+  deliveryRid:
+    apiName: deliveryRid
+    displayName: 배송
+    type: objectRef
+    objectType: Delivery
+    required: true
+    indexed: true
+stateMachine:
+  property: status
+  initial: planned
+  transitions:
+    - {from: planned, to: arrived}
+    - {from: planned, to: failed}
+    - {from: arrived, to: completed}
+    - {from: arrived, to: failed}
+invariants:
+  - apiName: stopSequenceUniquePerDelivery
+    description: 한 배송 안에서 순번은 유일해야 한다.

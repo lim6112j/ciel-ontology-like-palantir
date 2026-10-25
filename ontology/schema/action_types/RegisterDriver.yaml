@@ -1,0 +1,45 @@
+apiName: RegisterDriver
+displayName: 기사 등록
+description: 신규 배송기사를 등록한다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  employeeNo:
+    apiName: employeeNo
+    type: string
+    displayName: 사번
+  name:
+    apiName: name
+    type: string
+    displayName: 이름
+  employmentType:
+    apiName: employmentType
+    type: enum
+    values: [직영, 지입]
+    displayName: 고용형태
+  licenseType:
+    apiName: licenseType
+    type: enum
+    values: [1종보통, 1종대형, 2종보통]
+    displayName: 운전면허
+  depot:
+    apiName: depot
+    type: objectRef
+    objectType: Depot
+    displayName: 소속창고
+  phone:
+    apiName: phone
+    type: string
+    displayName: 연락처
+    required: false
+rules:
+  - type: createObject
+    objectType: Driver
+    properties:
+      employeeNo: {param: employeeNo}
+      name: {param: name}
+      employmentType: {param: employmentType}
+      licenseType: {param: licenseType}
+      depotRid: {param: depot}
+      phone: {param: phone}
+      status: {literal: available}

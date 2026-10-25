@@ -1,0 +1,14 @@
+apiName: RemoveOrderLine
+displayName: 발주라인 삭제
+description: 초안 발주에서 라인을 제거하고 합계를 다시 계산한다.
+agentProposable: false
+allowedRoles: [sales, manager]
+parameters:
+  line:
+    apiName: line
+    type: objectRef
+    objectType: SalesOrderLine
+    displayName: 발주라인
+rules:
+  - type: runFunction
+    function: removeOrderLine

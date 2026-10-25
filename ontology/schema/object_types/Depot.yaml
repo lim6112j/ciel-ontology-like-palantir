@@ -1,0 +1,50 @@
+apiName: Depot
+displayName: 창고
+pluralDisplayName: 창고
+primaryKey: depotNo
+properties:
+  depotNo:
+    apiName: depotNo
+    displayName: 창고코드
+    type: string
+    required: true
+    unique: true
+    maxLength: 24
+  name:
+    apiName: name
+    displayName: 창고명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 80
+  region:
+    apiName: region
+    displayName: 권역
+    type: enum
+    values: [수도권, 충청, 호남, 영남, 강원]
+    required: true
+    indexed: true
+  address:
+    apiName: address
+    displayName: 주소
+    type: string
+    maxLength: 300
+  lat:
+    apiName: lat
+    displayName: 위도
+    type: decimal
+    required: true
+    min: 33
+    max: 39
+  lon:
+    apiName: lon
+    displayName: 경도
+    type: decimal
+    required: true
+    min: 124
+    max: 132
+  capacityCases:
+    apiName: capacityCases
+    displayName: 보관케이스
+    type: integer
+    min: 0

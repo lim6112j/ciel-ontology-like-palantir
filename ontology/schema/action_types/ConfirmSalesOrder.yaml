@@ -1,0 +1,18 @@
+apiName: ConfirmSalesOrder
+displayName: 발주 확정
+description: 제출된 발주를 확정해 배차 대상으로 만든다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 발주
+rules:
+  - type: modifyObject
+    target: {param: order, objectType: SalesOrder}
+    expectedStatus: [submitted]
+    properties:
+      - property: status
+        value: confirmed

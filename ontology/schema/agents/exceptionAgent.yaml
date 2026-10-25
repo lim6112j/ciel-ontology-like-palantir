@@ -1,0 +1,19 @@
+apiName: exceptionAgent
+displayName: 배송 예외 처리 에이전트
+description: 결정적 함수가 찾아낸 지연·실패·과적·미배정 문제에 대한 대응을 제안한다.
+kind: exception
+systemPromptFile: prompts/exception.md
+temperature: 0.0
+maxTurns: 18
+maxTokens: 4096
+maxProposals: 5
+maxPageSize: 15
+allowedActionTypes:
+  - ReassignStop
+  - ReassignDriver
+  - FailStop
+  - CompleteStop
+allowedFunctions:
+  - detectDeliveryExceptions
+  - checkVehicleCapacity
+  - driverPerformance

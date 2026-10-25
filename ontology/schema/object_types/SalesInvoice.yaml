@@ -1,0 +1,56 @@
+apiName: SalesInvoice
+displayName: 판매계산서
+pluralDisplayName: 판매계산서
+description: 납품 완료 시 생성되는 판매계산서. 단가·수량은 발행 시점 스냅샷이다.
+primaryKey: invoiceNo
+properties:
+  invoiceNo:
+    apiName: invoiceNo
+    displayName: 계산서번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  issueDate:
+    apiName: issueDate
+    displayName: 발행일
+    type: date
+    required: true
+    indexed: true
+  totalAmount:
+    apiName: totalAmount
+    displayName: 총액(원)
+    type: bigint
+    required: true
+    min: 0
+    indexed: true
+  taxAmount:
+    apiName: taxAmount
+    displayName: 세액(원)
+    type: bigint
+    required: true
+    min: 0
+  totalCases:
+    apiName: totalCases
+    displayName: 총케이스
+    type: integer
+    required: true
+    min: 0
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [issued, cancelled]
+    required: true
+    indexed: true
+    defaultValue: issued
+  outletRid:
+    apiName: outletRid
+    displayName: 거래처
+    type: objectRef
+    objectType: Outlet
+    required: true
+    indexed: true
+invariants:
+  - apiName: invoiceTotalsMatchLines
+    description: totalAmount는 계산서 라인 금액 합과 같아야 한다.

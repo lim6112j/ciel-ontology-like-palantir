@@ -1,0 +1,47 @@
+apiName: DeliveryRoute
+displayName: 배송노선
+pluralDisplayName: 배송노선
+description: 요일별 상시 배송 노선 정의. 특정 일자의 실행은 Delivery가 담당한다.
+primaryKey: routeCode
+properties:
+  routeCode:
+    apiName: routeCode
+    displayName: 노선코드
+    type: string
+    required: true
+    unique: true
+    maxLength: 24
+  name:
+    apiName: name
+    displayName: 노선명
+    type: string
+    required: true
+    maxLength: 80
+  weekday:
+    apiName: weekday
+    displayName: 요일
+    description: 0=월 ... 6=일
+    type: integer
+    required: true
+    min: 0
+    max: 6
+    indexed: true
+  depotRid:
+    apiName: depotRid
+    displayName: 창고
+    type: objectRef
+    objectType: Depot
+    required: true
+    indexed: true
+  salesRepRid:
+    apiName: salesRepRid
+    displayName: 담당영업사원
+    type: objectRef
+    objectType: SalesRep
+  active:
+    apiName: active
+    displayName: 운영중
+    type: boolean
+    required: true
+    defaultValue: true
+    indexed: true

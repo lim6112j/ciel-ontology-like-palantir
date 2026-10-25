@@ -1,0 +1,20 @@
+apiName: ArriveAtStop
+displayName: 정류장 도착
+description: 기사가 납품처에 도착했음을 기록한다.
+agentProposable: false
+allowedRoles: [driver, manager]
+parameters:
+  stop:
+    apiName: stop
+    type: objectRef
+    objectType: DeliveryStop
+    displayName: 정류장
+rules:
+  - type: modifyObject
+    target: {param: stop, objectType: DeliveryStop}
+    expectedStatus: [planned]
+    properties:
+      - property: status
+        value: arrived
+      - property: arrivedAt
+        value: {now: true}

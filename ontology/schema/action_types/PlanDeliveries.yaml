@@ -1,0 +1,27 @@
+apiName: PlanDeliveries
+displayName: 배송 계획
+description: 지정 일자의 확정 발주로 배송·정류장을 생성한다. 요일·용량·거리 순회를 적용한다.
+agentProposable: true
+allowedRoles: [dispatcher, manager, agent]
+parameters:
+  deliveryDate:
+    apiName: deliveryDate
+    type: date
+    displayName: 배송일
+  depot:
+    apiName: depot
+    type: objectRef
+    objectType: Depot
+    displayName: 창고
+  maxStopsPerVehicle:
+    apiName: maxStopsPerVehicle
+    type: integer
+    displayName: 차량당최대정류장
+    required: false
+validators:
+  - field: maxStopsPerVehicle
+    rule: range
+    value: {min: 1, max: 60}
+rules:
+  - type: runFunction
+    function: planDeliveries

@@ -1,0 +1,60 @@
+apiName: Driver
+displayName: 배송기사
+pluralDisplayName: 배송기사
+primaryKey: employeeNo
+properties:
+  employeeNo:
+    apiName: employeeNo
+    displayName: 사번
+    type: string
+    required: true
+    unique: true
+    maxLength: 24
+  name:
+    apiName: name
+    displayName: 이름
+    type: string
+    required: true
+    indexed: true
+    maxLength: 60
+  phone:
+    apiName: phone
+    displayName: 연락처
+    type: string
+    maxLength: 24
+  employmentType:
+    apiName: employmentType
+    displayName: 고용형태
+    type: enum
+    values: [직영, 지입]
+    required: true
+    indexed: true
+  licenseType:
+    apiName: licenseType
+    displayName: 운전면허
+    type: enum
+    values: [1종보통, 1종대형, 2종보통]
+    required: true
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [available, on_leave, inactive]
+    required: true
+    indexed: true
+    defaultValue: available
+  depotRid:
+    apiName: depotRid
+    displayName: 소속창고
+    type: objectRef
+    objectType: Depot
+    required: true
+    indexed: true
+stateMachine:
+  property: status
+  initial: available
+  transitions:
+    - {from: available, to: on_leave}
+    - {from: on_leave, to: available}
+    - {from: available, to: inactive}
+    - {from: on_leave, to: inactive}

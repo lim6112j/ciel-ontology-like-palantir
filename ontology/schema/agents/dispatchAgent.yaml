@@ -1,0 +1,18 @@
+apiName: dispatchAgent
+displayName: 배송 배차 에이전트
+description: 확정 발주와 가용 자원을 확인해 배송 계획과 재배정을 제안한다.
+kind: dispatch
+systemPromptFile: prompts/dispatch.md
+temperature: 0.0
+maxTurns: 16
+maxTokens: 4096
+maxProposals: 5
+maxPageSize: 15
+allowedActionTypes:
+  - PlanDeliveries
+  - ReassignDriver
+  - ReassignStop
+allowedFunctions:
+  - detectDeliveryExceptions
+  - checkVehicleCapacity
+  - driverPerformance

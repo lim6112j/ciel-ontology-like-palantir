@@ -1,0 +1,32 @@
+apiName: UpsertDeliveryRoute
+displayName: 배송노선 등록/수정
+description: 요일별 상시 배송노선을 만들거나 수정한다.
+agentProposable: false
+allowedRoles: [dispatcher, manager]
+parameters:
+  routeCode:
+    apiName: routeCode
+    type: string
+    displayName: 노선코드
+  name:
+    apiName: name
+    type: string
+    displayName: 노선명
+  weekday:
+    apiName: weekday
+    type: integer
+    displayName: 요일
+  depot:
+    apiName: depot
+    type: objectRef
+    objectType: Depot
+    displayName: 창고
+  salesRep:
+    apiName: salesRep
+    type: objectRef
+    objectType: SalesRep
+    displayName: 담당영업사원
+    required: false
+rules:
+  - type: runFunction
+    function: upsertDeliveryRoute

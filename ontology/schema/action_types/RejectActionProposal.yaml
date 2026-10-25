@@ -1,0 +1,26 @@
+apiName: RejectActionProposal
+displayName: 제안 거절
+description: 운영자가 제안을 거절한다. 거절 사유는 이후 에이전트 개선 데이터로 남는다.
+agentProposable: false
+allowedRoles: [manager, dispatcher]
+parameters:
+  proposal:
+    apiName: proposal
+    type: objectRef
+    objectType: ActionProposal
+    displayName: 제안
+  reason:
+    apiName: reason
+    type: text
+    displayName: 거절사유
+rules:
+  - type: modifyObject
+    target: {param: proposal, objectType: ActionProposal}
+    expectedStatus: [proposed]
+    properties:
+      - property: status
+        value: rejected
+      - property: feedbackNote
+        fromParam: reason
+      - property: decidedAt
+        value: {now: true}

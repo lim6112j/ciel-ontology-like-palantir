@@ -1,0 +1,25 @@
+apiName: CancelSalesOrder
+displayName: 발주 취소
+description: 확정 전 발주를 취소한다. 배송이 시작된 발주는 취소할 수 없다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 발주
+  reason:
+    apiName: reason
+    type: text
+    displayName: 사유
+    required: false
+rules:
+  - type: modifyObject
+    target: {param: order, objectType: SalesOrder}
+    expectedStatus: [draft, submitted, confirmed]
+    properties:
+      - property: status
+        value: cancelled
+      - property: note
+        fromParam: reason

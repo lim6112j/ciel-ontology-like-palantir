@@ -1,0 +1,14 @@
+apiName: StartDelivery
+displayName: 배송 시작
+description: 기사가 배송을 시작한다. 배송 상태와 기사 근무를 함께 갱신한다.
+agentProposable: false
+allowedRoles: [driver, dispatcher, manager]
+parameters:
+  delivery:
+    apiName: delivery
+    type: objectRef
+    objectType: Delivery
+    displayName: 배송
+rules:
+  - type: runFunction
+    function: startDelivery

@@ -1,0 +1,48 @@
+apiName: DriverShift
+displayName: 기사근무
+pluralDisplayName: 기사근무
+primaryKey: shiftNo
+properties:
+  shiftNo:
+    apiName: shiftNo
+    displayName: 근무번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  shiftDate:
+    apiName: shiftDate
+    displayName: 근무일
+    type: date
+    required: true
+    indexed: true
+  startedAt:
+    apiName: startedAt
+    displayName: 출근시각
+    type: timestamp
+  endedAt:
+    apiName: endedAt
+    displayName: 퇴근시각
+    type: timestamp
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [scheduled, working, finished, absent]
+    required: true
+    indexed: true
+    defaultValue: scheduled
+  driverRid:
+    apiName: driverRid
+    displayName: 기사
+    type: objectRef
+    objectType: Driver
+    required: true
+    indexed: true
+stateMachine:
+  property: status
+  initial: scheduled
+  transitions:
+    - {from: scheduled, to: working}
+    - {from: scheduled, to: absent}
+    - {from: working, to: finished}

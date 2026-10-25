@@ -1,0 +1,28 @@
+apiName: AddOrderLine
+displayName: 발주라인 추가
+description: 초안 발주에 제품 라인을 추가하고 합계를 다시 계산한다.
+agentProposable: false
+allowedRoles: [sales, manager]
+parameters:
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 발주
+  product:
+    apiName: product
+    type: objectRef
+    objectType: Product
+    displayName: 제품
+  cases:
+    apiName: cases
+    type: integer
+    displayName: 케이스
+validators:
+  - field: cases
+    rule: range
+    value: {min: 1, max: 500}
+    message: 케이스는 1~500 사이여야 합니다.
+rules:
+  - type: runFunction
+    function: addOrderLine

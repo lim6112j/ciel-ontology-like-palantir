@@ -1,0 +1,45 @@
+apiName: UpsertOutlet
+displayName: 거래처 등록/수정
+description: 거래처를 신규 등록하거나 기존 거래처 정보를 갱신한다.
+agentProposable: true
+allowedRoles: [sales, manager, agent]
+parameters:
+  outletNo:
+    apiName: outletNo
+    type: string
+    displayName: 거래처코드
+    required: false
+  name:
+    apiName: name
+    type: string
+    displayName: 거래처명
+  outletType:
+    apiName: outletType
+    type: enum
+    values: [소매점, 일반음식점, 유흥주점, 편의점, 마트, 실수요자]
+    displayName: 업태
+  address:
+    apiName: address
+    type: string
+    displayName: 주소
+    required: false
+  deliveryWeekday:
+    apiName: deliveryWeekday
+    type: integer
+    displayName: 배송요일
+    required: false
+  depot:
+    apiName: depot
+    type: objectRef
+    objectType: Depot
+    displayName: 담당창고
+    required: false
+  salesRep:
+    apiName: salesRep
+    type: objectRef
+    objectType: SalesRep
+    displayName: 담당영업사원
+    required: false
+rules:
+  - type: runFunction
+    function: upsertOutlet

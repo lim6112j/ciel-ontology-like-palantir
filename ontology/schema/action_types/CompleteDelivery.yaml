@@ -1,0 +1,14 @@
+apiName: CompleteDelivery
+displayName: 배송 완료
+description: 모든 정류장을 마친 배송을 완료 처리한다. 실패 정류장이 있으면 부분 완료가 된다.
+agentProposable: true
+allowedRoles: [driver, dispatcher, manager, agent]
+parameters:
+  delivery:
+    apiName: delivery
+    type: objectRef
+    objectType: Delivery
+    displayName: 배송
+rules:
+  - type: runFunction
+    function: completeDelivery

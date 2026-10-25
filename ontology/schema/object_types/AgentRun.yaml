@@ -1,0 +1,73 @@
+apiName: AgentRun
+displayName: 에이전트실행
+pluralDisplayName: 에이전트실행
+description: 에이전트 호출 1건의 감사 기록. 도구 호출과 토큰 사용량을 보관한다.
+primaryKey: runNo
+internal: true
+properties:
+  runNo:
+    apiName: runNo
+    displayName: 실행번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  agentApiName:
+    apiName: agentApiName
+    displayName: 에이전트
+    type: string
+    required: true
+    indexed: true
+    maxLength: 96
+  model:
+    apiName: model
+    displayName: 모델
+    type: string
+    required: true
+    maxLength: 128
+  inputText:
+    apiName: inputText
+    displayName: 입력
+    type: text
+    required: true
+  toolCallCount:
+    apiName: toolCallCount
+    displayName: 도구호출수
+    type: integer
+    required: true
+    defaultValue: 0
+    min: 0
+  inputTokens:
+    apiName: inputTokens
+    displayName: 입력토큰
+    type: integer
+    min: 0
+    defaultValue: 0
+  outputTokens:
+    apiName: outputTokens
+    displayName: 출력토큰
+    type: integer
+    min: 0
+    defaultValue: 0
+  latencyMs:
+    apiName: latencyMs
+    displayName: 소요(ms)
+    type: integer
+    min: 0
+    defaultValue: 0
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [running, succeeded, failed, limited]
+    required: true
+    indexed: true
+    defaultValue: running
+  error:
+    apiName: error
+    displayName: 오류
+    type: text
+  transcript:
+    apiName: transcript
+    displayName: 대화기록
+    type: json

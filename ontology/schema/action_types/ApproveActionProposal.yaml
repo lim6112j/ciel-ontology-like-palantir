@@ -1,0 +1,25 @@
+apiName: ApproveActionProposal
+displayName: 제안 승인
+description: 운영자가 제안을 승인하면 대상 액션이 동일한 검증·감사 경로로 실행된다. 운영자 승인 전용 액션이다.
+agentProposable: false
+allowedRoles: [manager, dispatcher]
+parameters:
+  proposal:
+    apiName: proposal
+    type: objectRef
+    objectType: ActionProposal
+    displayName: 제안
+  approvedParams:
+    apiName: approvedParams
+    type: json
+    displayName: 수정된파라미터
+    description: 승인 시 파라미터를 고칠 수 있다. 비우면 제안 값을 쓴다.
+    required: false
+  note:
+    apiName: note
+    type: text
+    displayName: 승인메모
+    required: false
+rules:
+  - type: runFunction
+    function: applyApprovedProposal

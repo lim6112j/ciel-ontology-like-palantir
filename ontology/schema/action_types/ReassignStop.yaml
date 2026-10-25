@@ -1,0 +1,24 @@
+apiName: ReassignStop
+displayName: 정류장 재배차
+description: 실패하거나 미완료된 정류장을 다른 배송으로 옮긴다.
+agentProposable: true
+allowedRoles: [dispatcher, manager, agent]
+parameters:
+  stop:
+    apiName: stop
+    type: objectRef
+    objectType: DeliveryStop
+    displayName: 정류장
+  targetDelivery:
+    apiName: targetDelivery
+    type: objectRef
+    objectType: Delivery
+    displayName: 대상배송
+  sequence:
+    apiName: sequence
+    type: integer
+    displayName: 순번
+    required: false
+rules:
+  - type: runFunction
+    function: reassignStop

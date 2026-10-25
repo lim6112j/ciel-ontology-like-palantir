@@ -1,0 +1,53 @@
+apiName: Vehicle
+displayName: 차량
+pluralDisplayName: 차량
+primaryKey: plateNo
+properties:
+  plateNo:
+    apiName: plateNo
+    displayName: 차량번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 20
+  vehicleType:
+    apiName: vehicleType
+    displayName: 차종
+    type: enum
+    values: [1톤탑차, 1.4톤탑차, 2.5톤탑차, 5톤윙바디]
+    required: true
+  capacityCases:
+    apiName: capacityCases
+    displayName: 적재케이스
+    type: integer
+    required: true
+    min: 1
+  capacityWeightKg:
+    apiName: capacityWeightKg
+    displayName: 적재중량(kg)
+    type: integer
+    required: true
+    min: 1
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [available, maintenance, retired]
+    required: true
+    indexed: true
+    defaultValue: available
+  depotRid:
+    apiName: depotRid
+    displayName: 소속창고
+    type: objectRef
+    objectType: Depot
+    required: true
+    indexed: true
+stateMachine:
+  property: status
+  initial: available
+  transitions:
+    - {from: available, to: maintenance}
+    - {from: maintenance, to: available}
+    - {from: available, to: retired}
+    - {from: maintenance, to: retired}

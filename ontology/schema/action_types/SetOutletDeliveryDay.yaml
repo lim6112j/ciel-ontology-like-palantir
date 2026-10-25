@@ -1,0 +1,21 @@
+apiName: SetOutletDeliveryDay
+displayName: 배송요일 변경
+description: 거래처의 정기 배송요일을 변경한다.
+agentProposable: true
+allowedRoles: [sales, manager, agent]
+parameters:
+  outlet:
+    apiName: outlet
+    type: objectRef
+    objectType: Outlet
+    displayName: 거래처
+  deliveryWeekday:
+    apiName: deliveryWeekday
+    type: integer
+    displayName: 배송요일
+rules:
+  - type: modifyObject
+    target: {param: outlet, objectType: Outlet}
+    properties:
+      - property: deliveryWeekday
+        fromParam: deliveryWeekday

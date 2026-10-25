@@ -1,0 +1,43 @@
+apiName: SalesOrderLine
+displayName: 발주라인
+pluralDisplayName: 발주라인
+primaryKey: lineNo
+properties:
+  lineNo:
+    apiName: lineNo
+    displayName: 라인번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  orderedCases:
+    apiName: orderedCases
+    displayName: 주문케이스
+    type: integer
+    required: true
+    min: 1
+  unitPrice:
+    apiName: unitPrice
+    displayName: 케이스단가(원)
+    type: integer
+    required: true
+    min: 0
+  lineAmount:
+    apiName: lineAmount
+    displayName: 라인금액(원)
+    type: bigint
+    required: true
+    min: 0
+  productName:
+    apiName: productName
+    displayName: 제품명
+    type: string
+    required: true
+    maxLength: 120
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true

@@ -1,0 +1,26 @@
+apiName: SetStopSequence
+displayName: 정류장 순번 변경
+description: 배송 계획을 출발 전에 수동으로 조정한다.
+agentProposable: false
+allowedRoles: [dispatcher, manager]
+parameters:
+  stop:
+    apiName: stop
+    type: objectRef
+    objectType: DeliveryStop
+    displayName: 정류장
+  sequence:
+    apiName: sequence
+    type: integer
+    displayName: 순번
+validators:
+  - field: sequence
+    rule: range
+    value: {min: 1, max: 200}
+rules:
+  - type: modifyObject
+    target: {param: stop, objectType: DeliveryStop}
+    expectedStatus: [planned]
+    properties:
+      - property: sequence
+        fromParam: sequence

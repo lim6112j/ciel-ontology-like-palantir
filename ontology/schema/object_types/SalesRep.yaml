@@ -1,0 +1,50 @@
+apiName: SalesRep
+displayName: 영업사원
+pluralDisplayName: 영업사원
+primaryKey: employeeNo
+properties:
+  employeeNo:
+    apiName: employeeNo
+    displayName: 사번
+    type: string
+    required: true
+    unique: true
+    maxLength: 24
+  name:
+    apiName: name
+    displayName: 이름
+    type: string
+    required: true
+    indexed: true
+    maxLength: 60
+  phone:
+    apiName: phone
+    displayName: 연락처
+    type: string
+    maxLength: 24
+  territory:
+    apiName: territory
+    displayName: 담당구역
+    type: string
+    indexed: true
+    maxLength: 80
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [active, inactive]
+    required: true
+    defaultValue: active
+  depotRid:
+    apiName: depotRid
+    displayName: 소속창고
+    type: objectRef
+    objectType: Depot
+    required: true
+    indexed: true
+stateMachine:
+  property: status
+  initial: active
+  transitions:
+    - {from: active, to: inactive}
+    - {from: inactive, to: active}

@@ -1,0 +1,22 @@
+apiName: SetDriverAvailability
+displayName: 기사 가용상태 변경
+description: 기사의 가용·휴무·비활성 상태를 변경한다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  driver:
+    apiName: driver
+    type: objectRef
+    objectType: Driver
+    displayName: 기사
+  status:
+    apiName: status
+    type: enum
+    values: [available, on_leave, inactive]
+    displayName: 상태
+rules:
+  - type: modifyObject
+    target: {param: driver, objectType: Driver}
+    properties:
+      - property: status
+        fromParam: status

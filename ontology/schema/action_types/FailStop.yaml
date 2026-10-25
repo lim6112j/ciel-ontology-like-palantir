@@ -1,0 +1,34 @@
+apiName: FailStop
+displayName: 납품 실패
+description: 납품 실패 사유를 기록한다. 실패한 정류장은 재배차 대상이 된다.
+agentProposable: true
+allowedRoles: [driver, manager, agent]
+parameters:
+  stop:
+    apiName: stop
+    type: objectRef
+    objectType: DeliveryStop
+    displayName: 정류장
+  reason:
+    apiName: reason
+    type: enum
+    values: [영업중아님, 재고없음, 거래처요청, 차량문제, 주소오류, 기타]
+    displayName: 실패사유
+  note:
+    apiName: note
+    type: text
+    displayName: 상세
+    required: false
+rules:
+  - type: modifyObject
+    target: {param: stop, objectType: DeliveryStop}
+    expectedStatus: [planned, arrived]
+    properties:
+      - property: status
+        value: failed
+      - property: failureReason
+        fromParam: reason
+      - property: failureNote
+        fromParam: note
+      - property: completedAt
+        value: {now: true}

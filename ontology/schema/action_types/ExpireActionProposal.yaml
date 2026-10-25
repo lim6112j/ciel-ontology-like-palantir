@@ -1,0 +1,27 @@
+apiName: ExpireActionProposal
+displayName: 제안 만료
+description: 오래된 제안을 만료 처리한다. 만료된 제안은 승인할 수 없다.
+agentProposable: false
+allowedRoles: [manager, dispatcher]
+parameters:
+  proposal:
+    apiName: proposal
+    type: objectRef
+    objectType: ActionProposal
+    displayName: 제안
+  reason:
+    apiName: reason
+    type: text
+    displayName: 만료사유
+    required: false
+rules:
+  - type: modifyObject
+    target: {param: proposal, objectType: ActionProposal}
+    expectedStatus: [proposed]
+    properties:
+      - property: status
+        value: expired
+      - property: feedbackNote
+        fromParam: reason
+      - property: decidedAt
+        value: {now: true}

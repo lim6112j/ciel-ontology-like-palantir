@@ -1,0 +1,18 @@
+apiName: SubmitSalesOrder
+displayName: 발주 제출
+description: 초안 발주를 제출 상태로 전이한다. 라인이 없으면 거부된다.
+agentProposable: true
+allowedRoles: [sales, manager, agent]
+parameters:
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 발주
+rules:
+  - type: modifyObject
+    target: {param: order, objectType: SalesOrder}
+    expectedStatus: [draft]
+    properties:
+      - property: status
+        value: submitted

@@ -1,0 +1,24 @@
+apiName: CompleteStop
+displayName: 납품 완료
+description: 납품을 완료하고 판매계산서를 발행하며 발주 상태를 갱신한다.
+agentProposable: true
+allowedRoles: [driver, manager, agent]
+parameters:
+  stop:
+    apiName: stop
+    type: objectRef
+    objectType: DeliveryStop
+    displayName: 정류장
+  actualCases:
+    apiName: actualCases
+    type: integer
+    displayName: 실제케이스
+    description: 계획보다 적게 납품한 경우 부분 납품으로 기록된다.
+validators:
+  - field: actualCases
+    rule: range
+    value: {min: 0, max: 2000}
+    message: 실제 케이스는 0~2000 사이여야 합니다.
+rules:
+  - type: runFunction
+    function: completeStop

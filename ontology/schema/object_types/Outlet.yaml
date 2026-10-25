@@ -1,0 +1,113 @@
+apiName: Outlet
+displayName: 거래처
+pluralDisplayName: 거래처
+description: 주류를 납품하는 소매점·음식점·유흥주점 등 거래처. 면허 정보는 보관하지만 v1에서 규제를 강제하지 않는다.
+primaryKey: outletNo
+properties:
+  outletNo:
+    apiName: outletNo
+    displayName: 거래처코드
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 거래처명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  outletType:
+    apiName: outletType
+    displayName: 업태
+    type: enum
+    values: [소매점, 일반음식점, 유흥주점, 편의점, 마트, 실수요자]
+    required: true
+    indexed: true
+  bizRegNo:
+    apiName: bizRegNo
+    displayName: 사업자등록번호
+    type: string
+    maxLength: 12
+  licenseNo:
+    apiName: licenseNo
+    displayName: 주류판매업면허번호
+    type: string
+    maxLength: 40
+  licenseType:
+    apiName: licenseType
+    displayName: 면허종류
+    type: enum
+    values: [주류소매업, 주정소매업, 일반음식점, 단란주점, 유흥주점, 없음]
+    defaultValue: 없음
+  address:
+    apiName: address
+    displayName: 주소
+    type: string
+    maxLength: 300
+  lat:
+    apiName: lat
+    displayName: 위도
+    type: decimal
+    min: 33
+    max: 39
+  lon:
+    apiName: lon
+    displayName: 경도
+    type: decimal
+    min: 124
+    max: 132
+  deliveryWeekday:
+    apiName: deliveryWeekday
+    displayName: 배송요일
+    description: 0=월 ... 6=일
+    type: integer
+    min: 0
+    max: 6
+    indexed: true
+  deliveryWindow:
+    apiName: deliveryWindow
+    displayName: 배송시간대
+    type: enum
+    values: [오전, 오후, 종일]
+    defaultValue: 종일
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [active, suspended, closed]
+    required: true
+    indexed: true
+    defaultValue: active
+  salesRepRid:
+    apiName: salesRepRid
+    displayName: 담당영업사원
+    type: objectRef
+    objectType: SalesRep
+    indexed: true
+  depotRid:
+    apiName: depotRid
+    displayName: 담당창고
+    type: objectRef
+    objectType: Depot
+    indexed: true
+  routeRid:
+    apiName: routeRid
+    displayName: 배송노선
+    type: objectRef
+    objectType: DeliveryRoute
+    indexed: true
+  note:
+    apiName: note
+    displayName: 비고
+    type: text
+stateMachine:
+  property: status
+  initial: active
+  transitions:
+    - {from: active, to: suspended}
+    - {from: suspended, to: active}
+    - {from: active, to: closed}
+    - {from: suspended, to: closed}
+    - {from: closed, to: active}

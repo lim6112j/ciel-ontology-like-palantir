@@ -1,0 +1,93 @@
+apiName: SalesOrder
+displayName: 발주
+pluralDisplayName: 발주
+description: 거래처 발주. 합계는 라인에서 계산해 저장한다.
+primaryKey: orderNo
+properties:
+  orderNo:
+    apiName: orderNo
+    displayName: 발주번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  outletRid:
+    apiName: outletRid
+    displayName: 거래처
+    type: objectRef
+    objectType: Outlet
+    required: true
+    indexed: true
+  salesRepRid:
+    apiName: salesRepRid
+    displayName: 영업사원
+    type: objectRef
+    objectType: SalesRep
+    indexed: true
+  orderDate:
+    apiName: orderDate
+    displayName: 발주일
+    type: date
+    required: true
+    indexed: true
+  requestedDeliveryDate:
+    apiName: requestedDeliveryDate
+    displayName: 희망납기일
+    type: date
+    indexed: true
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [draft, submitted, confirmed, partially_fulfilled, fulfilled, cancelled]
+    required: true
+    indexed: true
+    defaultValue: draft
+  channel:
+    apiName: channel
+    displayName: 접수경로
+    type: enum
+    values: [phone, message, app, agent]
+    required: true
+    defaultValue: phone
+  totalAmount:
+    apiName: totalAmount
+    displayName: 총액(원)
+    type: bigint
+    min: 0
+    indexed: true
+  taxAmount:
+    apiName: taxAmount
+    displayName: 세액(원)
+    type: bigint
+    min: 0
+  totalCases:
+    apiName: totalCases
+    displayName: 총케이스
+    type: integer
+    min: 0
+  note:
+    apiName: note
+    displayName: 비고
+    type: text
+  sourceProposalRid:
+    apiName: sourceProposalRid
+    displayName: 생성한제안
+    type: objectRef
+    objectType: ActionProposal
+stateMachine:
+  property: status
+  initial: draft
+  transitions:
+    - {from: draft, to: submitted}
+    - {from: submitted, to: confirmed}
+    - {from: submitted, to: cancelled}
+    - {from: draft, to: cancelled}
+    - {from: confirmed, to: partially_fulfilled}
+    - {from: confirmed, to: fulfilled}
+    - {from: confirmed, to: cancelled}
+    - {from: partially_fulfilled, to: partially_fulfilled}
+    - {from: partially_fulfilled, to: fulfilled}
+invariants:
+  - apiName: orderTotalsMatchLines
+    description: totalAmount는 발주 라인 금액의 합과 같아야 한다.

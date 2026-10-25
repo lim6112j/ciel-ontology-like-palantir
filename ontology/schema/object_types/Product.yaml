@@ -1,0 +1,76 @@
+apiName: Product
+displayName: 제품
+pluralDisplayName: 제품
+description: 주류 SKU. 수량은 케이스 단위 정수로 관리한다.
+primaryKey: sku
+properties:
+  sku:
+    apiName: sku
+    displayName: SKU
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 제품명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  category:
+    apiName: category
+    displayName: 주종
+    type: enum
+    values: [소주, 맥주, 탁주, 청주, 양주, 와인, 기타]
+    required: true
+    indexed: true
+  manufacturer:
+    apiName: manufacturer
+    displayName: 제조사
+    type: string
+    indexed: true
+    maxLength: 80
+  volumeMl:
+    apiName: volumeMl
+    displayName: 용량(ml)
+    type: integer
+    required: true
+    min: 1
+  unitsPerCase:
+    apiName: unitsPerCase
+    displayName: 케이스당 병수
+    type: integer
+    required: true
+    min: 1
+  unitPrice:
+    apiName: unitPrice
+    displayName: 병당 단가(원)
+    type: integer
+    required: true
+    min: 0
+  casePrice:
+    apiName: casePrice
+    displayName: 케이스 단가(원)
+    type: integer
+    required: true
+    min: 0
+  taxType:
+    apiName: taxType
+    displayName: 과세구분
+    type: enum
+    values: [과세, 면세]
+    defaultValue: 과세
+  alcoholPercent:
+    apiName: alcoholPercent
+    displayName: 알코올도수
+    type: decimal
+    min: 0
+    max: 100
+  active:
+    apiName: active
+    displayName: 판매중
+    type: boolean
+    required: true
+    indexed: true
+    defaultValue: true

@@ -1,0 +1,41 @@
+apiName: InvoiceLine
+displayName: 계산서라인
+pluralDisplayName: 계산서라인
+primaryKey: invoiceLineNo
+properties:
+  invoiceLineNo:
+    apiName: invoiceLineNo
+    displayName: 계산서라인번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  deliveredCases:
+    apiName: deliveredCases
+    displayName: 납품케이스
+    type: integer
+    required: true
+    min: 0
+  unitPrice:
+    apiName: unitPrice
+    displayName: 케이스단가(원)
+    type: integer
+    required: true
+    min: 0
+  lineAmount:
+    apiName: lineAmount
+    displayName: 라인금액(원)
+    type: bigint
+    required: true
+    min: 0
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+  orderLineRid:
+    apiName: orderLineRid
+    displayName: 원발주라인
+    type: objectRef
+    objectType: SalesOrderLine

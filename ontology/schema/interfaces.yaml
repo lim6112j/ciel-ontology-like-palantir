@@ -1,0 +1,3 @@
+# Reserved for Foundry-style interfaces. No runtime semantics in v1:
+# object types may list `interfaceRefs`, and the loader checks the names exist.
+interfaces: []

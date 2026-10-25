@@ -1,0 +1,45 @@
+apiName: CreateSalesOrder
+displayName: 발주 생성
+description: 거래처·영업사원·발주일과 라인을 받아 초안 발주와 라인을 함께 만든다.
+agentProposable: true
+allowedRoles: [sales, manager, agent]
+parameters:
+  outlet:
+    apiName: outlet
+    type: objectRef
+    objectType: Outlet
+    displayName: 거래처
+  salesRep:
+    apiName: salesRep
+    type: objectRef
+    objectType: SalesRep
+    displayName: 영업사원
+    required: false
+  orderDate:
+    apiName: orderDate
+    type: date
+    displayName: 발주일
+  requestedDeliveryDate:
+    apiName: requestedDeliveryDate
+    type: date
+    displayName: 희망납기일
+    required: false
+  channel:
+    apiName: channel
+    type: enum
+    values: [phone, message, app, agent]
+    displayName: 접수경로
+    defaultValue: phone
+  lines:
+    apiName: lines
+    type: json
+    displayName: 라인
+    description: '[{"productRid": "ri...", "cases": 10}]'
+  note:
+    apiName: note
+    type: text
+    displayName: 비고
+    required: false
+rules:
+  - type: runFunction
+    function: createSalesOrder

@@ -1,0 +1,91 @@
+apiName: Delivery
+displayName: 배송
+pluralDisplayName: 배송
+description: 특정 일자에 한 기사·차량이 수행하는 배송 실행 단위.
+primaryKey: deliveryNo
+properties:
+  deliveryNo:
+    apiName: deliveryNo
+    displayName: 배송번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  deliveryDate:
+    apiName: deliveryDate
+    displayName: 배송일
+    type: date
+    required: true
+    indexed: true
+  depotRid:
+    apiName: depotRid
+    displayName: 창고
+    type: objectRef
+    objectType: Depot
+    required: true
+    indexed: true
+  driverRid:
+    apiName: driverRid
+    displayName: 기사
+    type: objectRef
+    objectType: Driver
+    indexed: true
+  vehicleRid:
+    apiName: vehicleRid
+    displayName: 차량
+    type: objectRef
+    objectType: Vehicle
+    indexed: true
+  routeRid:
+    apiName: routeRid
+    displayName: 배송노선
+    type: objectRef
+    objectType: DeliveryRoute
+    indexed: true
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [planned, dispatched, in_progress, completed, partially_completed, cancelled]
+    required: true
+    indexed: true
+    defaultValue: planned
+  plannedDistanceKm:
+    apiName: plannedDistanceKm
+    displayName: 계획거리(km)
+    type: decimal
+    min: 0
+  plannedDurationMin:
+    apiName: plannedDurationMin
+    displayName: 계획소요(분)
+    type: integer
+    min: 0
+  totalStops:
+    apiName: totalStops
+    displayName: 정류장수
+    type: integer
+    min: 0
+  totalCases:
+    apiName: totalCases
+    displayName: 총케이스
+    type: integer
+    min: 0
+  startedAt:
+    apiName: startedAt
+    displayName: 출발시각
+    type: timestamp
+  completedAt:
+    apiName: completedAt
+    displayName: 완료시각
+    type: timestamp
+stateMachine:
+  property: status
+  initial: planned
+  transitions:
+    - {from: planned, to: dispatched}
+    - {from: planned, to: cancelled}
+    - {from: dispatched, to: in_progress}
+    - {from: dispatched, to: cancelled}
+    - {from: in_progress, to: completed}
+    - {from: in_progress, to: partially_completed}
+    - {from: in_progress, to: cancelled}
