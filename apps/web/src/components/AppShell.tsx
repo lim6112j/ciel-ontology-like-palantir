@@ -20,7 +20,7 @@ export function AppShell() {
       <aside className="sidebar">
         <div className="brand">
           주류 도매 온톨로지
-          <span>Palantir-style runtime</span>
+          <span>Ciel runtime</span>
         </div>
         <nav className="nav">
           {NAV.map((item, index) =>

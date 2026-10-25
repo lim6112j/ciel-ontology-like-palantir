@@ -22,7 +22,11 @@ uv run uvicorn ontology_runtime.api.app:app --reload      # http://localhost:800
 cd apps/web && pnpm install && pnpm dev                    # http://localhost:5173
 ```
 
-에이전트를 실제로 실행하려면 `OPENROUTER_API_KEY`가 필요합니다(테스트는 불필요).
+에이전트를 실제로 실행하려면 `OPENROUTER_API_KEY`가 필요합니다. 기본 테스트는 이 키 없이도
+돌고, 실제 호출 테스트만 `-m live`로 분리되어 있습니다.
+
+`uv run ontology demo`는 발주→배차→납품 시퀀스를 한 번에 재생하며, `uv run ontology docs`는
+스키마에서 `docs/ontology.md`를 생성합니다.
 
 ## 구조
 
@@ -30,8 +34,11 @@ cd apps/web && pnpm install && pnpm dev                    # http://localhost:51
 ontology/schema/        # 온톨로지 정의 (16 object types, 25 links, 25 actions, 21 functions, 4 agents)
 src/ontology_runtime/
   loader.py registry.py # YAML → 메타모델 → 역링크/인덱스 도출
+  runtime.py            # 레지스트리 + 스토어 + 액션/함수 파사드
+  db/                   # 엔진·세션·테이블 (JSONB objects/links, 감사 로그)
   store/                # JSONB 객체·링크 저장, 선언 인덱스 동기화
   query/                # allowlist 필터 DSL, object set, 집계
+  validation/          # Violation 형태, 객체 불변식
   actions/              # EditBatch 단일 쓰기 경로 (검증·감사·멱등성)
   functions/            # 읽기/쓰기 도메인 함수
   agents/               # 에이전트 루프, 도구 표면, 가드레일, OpenRouter 어댑터
@@ -71,6 +78,15 @@ TypeScript 타입과 클라이언트를 생성합니다. 속성/액션 추가 �
 LLM이 문제를 발명하지 않게 해 재현성을 확보합니다.
 
 모델 기본값은 `deepseek/deepseek-v4.1-flash-1017` (OpenRouter, 1M 컨텍스트, tool calling 지원).
+에이전트별로 `model:`/`fallbackModel:`을 지정하거나, `OPENROUTER_MODEL`로 전역 변경할 수
+있습니다. 어떤 모델을 썼는지는 `AgentRun.model`에 실행 단위로 기록됩니다.
+
+```yaml
+# ontology/schema/agents/opsCopilotAgent.yaml
+apiName: opsCopilotAgent
+model: anthropic/claude-opus-5-5
+fallbackModel: deepseek/deepseek-v4.1-flash-1017
+```
 
 ## API 예시
 
@@ -108,11 +124,19 @@ curl -s -X POST localhost:8000/api/actions/ApproveActionProposal/apply \
 
 ```bash
 uv run pytest -q --cov=ontology_runtime --cov-fail-under=80   # 키 불필요 (fixture 리플레이)
-uv run pytest -m live -q                                       # 실제 OpenRouter 호출
+uv run pytest -m live -q                                       # 실제 OpenRouter 호출 (키 필요)
 ```
 
-통합 테스트는 PostgreSQL이 필요합니다. `ONTOLOGY_TEST_DATABASE_URL`로 재정의할 수 있습니다.
-API 테스트는 시드를 유지하려면 `ONTOLOGY_KEEP_SEED=1`을 설정합니다.
+통합 테스트는 PostgreSQL이 필요합니다. 기본값은 아래 환경변수로 재정의합니다.
+
+| 변수 | 기본값 | 용도 |
+|---|---|---|
+| `ONTOLOGY_TEST_DATABASE_URL` | `.../ontology_test` | 통합 테스트 본문 |
+| `ONTOLOGY_MIGRATION_DATABASE_URL` | `.../ontology_migrations` | up/down 마이그레이션 테스트 |
+| `ONTOLOGY_API_DATABASE_URL` | `.../ontology_api` | API 테스트(모듈당 1회 시드) |
+| `ONTOLOGY_KEEP_SEED` | 미설정 | `1`이면 API 테스트 후 시드 데이터 유지 |
+
+`-m live` 테스트는 기본 실행에서 제외됩니다(`addopts = -m 'not live'`).
 
 ## v1 범위 밖
 
