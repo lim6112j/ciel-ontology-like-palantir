@@ -11,20 +11,35 @@ interface Turn {
   runNo?: string;
 }
 
-const PRESETS = [
-  '행복식당 소주 5박스 내일 배송으로 접수해줘',
-  '2026-10-27 배차 계획 세워줘',
-  '오늘 배송에서 문제가 있는 정류장 알려줘',
-  '이번 주 기사별 실적을 요약해줘',
+interface Preset {
+  text: string;
+  agent: string;
+}
+
+// Each preset names the agent that is actually allowed to handle it; otherwise the
+// runtime rejects the call and the user sees a confusing permission error.
+const PRESETS: Preset[] = [
+  { text: '행복식당 소주 5박스 내일 배송으로 접수해줘', agent: 'orderIntakeAgent' },
+  { text: '2026-10-27 배차 계획 세워줘', agent: 'dispatchAgent' },
+  { text: '오늘 배송에서 문제가 있는 정류장 알려줘', agent: 'exceptionAgent' },
+  { text: '이번 주 기사별 실적을 요약해줘', agent: 'opsCopilotAgent' },
 ];
 
+const DEFAULT_AGENT =
+  AGENTS.find((entry) => entry.apiName === 'opsCopilotAgent')?.apiName ??
+  AGENTS[0]?.apiName ??
+  'opsCopilotAgent';
+
 export function AgentChat() {
-  const [agent, setAgent] = useState<string>(AGENTS[0]?.apiName ?? 'orderIntakeAgent');
+  const [agent, setAgent] = useState<string>(DEFAULT_AGENT);
   const [input, setInput] = useState('');
   const [turns, setTurns] = useState<Turn[]>([]);
 
   const invoke = useMutation({
-    mutationFn: (message: string) => api.invokeAgent(agent, message),
+    // Pass the agent explicitly: setAgent is async, so relying on state here would
+    // call the previously selected agent on the first click after a preset.
+    mutationFn: ({ message, target }: { message: string; target: string }) =>
+      api.invokeAgent(target, message),
     onSuccess: (result) => {
       const payload = result.data;
       setTurns((current) => [
@@ -50,12 +65,13 @@ export function AgentChat() {
     },
   });
 
-  const send = (text: string) => {
+  const send = (text: string, targetAgent = agent) => {
     const message = text.trim();
     if (!message || invoke.isPending) return;
+    setAgent(targetAgent);
     setTurns((current) => [...current, { role: 'user', text: message }]);
     setInput('');
-    invoke.mutate(message);
+    invoke.mutate({ message, target: targetAgent });
   };
 
   return (
@@ -83,8 +99,13 @@ export function AgentChat() {
         </div>
         <div className="actions">
           {PRESETS.map((preset) => (
-            <button key={preset} className="ghost" onClick={() => send(preset)} disabled={invoke.isPending}>
-              {preset}
+            <button
+              key={preset.text}
+              className="ghost"
+              onClick={() => send(preset.text, preset.agent)}
+              disabled={invoke.isPending}
+            >
+              {preset.text}
             </button>
           ))}
         </div>
