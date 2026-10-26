@@ -8,6 +8,12 @@ Palantir Foundry의 **온톨로지(object type / link type / action type / funct
 - OSDK 호환 형태(`apiName`, `rid`, `primaryKey`, object set, `validate`/`apply`,
   `Idempotency-Key`, `X-Actor`)를 유지해 나중에 `@osdk/maker`로 내보내기 쉽습니다.
 
+## 문서
+
+- [구조 상세](구조상세.md) — 실행 경로, SchemaRegistry, 함수/액션 관계, 상태 전이,
+  AI 에이전트의 역할, 스키마에서 생성되는 API·타입·문서·인덱스의 동작 방식
+- [온톨로지 스키마](docs/ontology.md) — 스키마에서 자동 생성되는 객체/링크/액션/함수/에이전트 요약
+
 ## 빠른 시작
 
 ```bash
