@@ -407,6 +407,10 @@ class TestAnalytics:
         assert entry["completedStops"] == 1
         assert entry["casesDelivered"] == 5
         assert entry["onTimeRate"] == 1.0
+        # Humans read names, agents reuse rids — both must be present.
+        assert entry["driverRid"].startswith("ri.liquor.object.driver.")
+        assert entry["driver"]
+        assert entry["employeeNo"]
 
     async def test_driver_performance_requires_range(self, runtime: Runtime) -> None:
         from ontology_runtime.errors import ValidationFailed
@@ -430,10 +434,14 @@ class TestAnalytics:
         )
         assert forecast["weeks"] == 4
         assert forecast["forecast"]
+        assert forecast["outletName"]
+        assert forecast["forecast"][0]["product"]
+        assert forecast["forecast"][0]["productRid"].startswith("ri.liquor.object.product.")
 
         credit = await runtime.run_function("scoreOutletCredit", {"outlet": ids["outlet"]})
         assert credit["orderCount"] == 1
         assert credit["riskBand"] == "low"
+        assert credit["outletName"]
 
 
 class TestProposalGuards:

@@ -51,6 +51,21 @@ async def driver_performance(context: EditContext, **kwargs: Any) -> dict[str, A
     deliveries = await context.search("Delivery")
     stops = await context.search("DeliveryStop")
 
+    driver_names: dict[str, dict[str, str]] = {}
+
+    async def driver_labels(rid: str) -> dict[str, str]:
+        if rid not in driver_names:
+            driver = await context.get(rid)
+            driver_names[rid] = (
+                {
+                    "driver": str(driver.properties.get("name")),
+                    "employeeNo": str(driver.properties.get("employeeNo")),
+                }
+                if driver
+                else {"driver": "", "employeeNo": ""}
+            )
+        return driver_names[rid]
+
     per_driver: dict[str, dict[str, Any]] = {}
     for delivery in deliveries:
         delivery_date = _date(delivery.properties.get("deliveryDate"))
@@ -90,11 +105,12 @@ async def driver_performance(context: EditContext, **kwargs: Any) -> dict[str, A
                 entry["failedStops"] += 1
 
     results = []
-    for entry in per_driver.values():
+    for rid, entry in per_driver.items():
         evaluated = entry["completedStops"] + entry["failedStops"]
         results.append(
             {
                 **entry,
+                **(await driver_labels(rid)),
                 "onTimeRate": round(entry["onTimeStops"] / evaluated, 3) if evaluated else None,
             }
         )
@@ -123,16 +139,24 @@ async def forecast_outlet_demand(
                 line.properties.get("orderedCases") or 0
             )
 
-    forecast = [
-        {
-            "productRid": product,
-            "weeklyAverageCases": round(total / window, 2),
-            "windowWeeks": window,
-            "totalCases": total,
-        }
-        for product, total in sorted(by_product.items())
-    ]
-    return {"outlet": outlet, "weeks": window, "forecast": forecast}
+    outlet_obj = await context.get(outlet)
+    outlet_name = str(outlet_obj.properties.get("name")) if outlet_obj else ""
+    product_names: dict[str, str] = {}
+    forecast = []
+    for product, total in sorted(by_product.items()):
+        if product not in product_names:
+            product_obj = await context.get(product)
+            product_names[product] = str(product_obj.properties.get("name")) if product_obj else ""
+        forecast.append(
+            {
+                "product": product_names[product],
+                "productRid": product,
+                "weeklyAverageCases": round(total / window, 2),
+                "windowWeeks": window,
+                "totalCases": total,
+            }
+        )
+    return {"outlet": outlet, "outletName": outlet_name, "weeks": window, "forecast": forecast}
 
 
 async def score_outlet_credit(context: EditContext, outlet: str) -> dict[str, Any]:
@@ -159,8 +183,10 @@ async def score_outlet_credit(context: EditContext, outlet: str) -> dict[str, An
         if score >= MEDIUM_RISK_THRESHOLD
         else "low"
     )
+    outlet_obj = await context.get(outlet)
     return {
         "outlet": outlet,
+        "outletName": str(outlet_obj.properties.get("name")) if outlet_obj else "",
         "orderCount": len(orders),
         "stopCount": total_stops,
         "failureRate": round(failure_rate, 3),
