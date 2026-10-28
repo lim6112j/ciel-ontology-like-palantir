@@ -42,12 +42,18 @@ DB 접속 문자열은 `DATABASE_URL_<도메인 대문자>`(`DATABASE_URL_LIQUOR
 
 ```bash
 docker compose up -d db                     # PostgreSQL 16, 포트 55432
+./liquor.sh                                 # http://localhost:8000
+cd apps/web && pnpm install && pnpm dev     # http://localhost:5173
+```
+
+수동으로 할 때는:
+
+```bash
 uv sync
 uv run alembic upgrade head                 # 공통 스키마 (도메인별 테이블 없음)
 uv run ontology --domain liquor sync-indexes
 uv run ontology --domain liquor seed --seed 42
 uv run uvicorn ontology_runtime.api.app:app --reload   # http://localhost:8000
-cd apps/web && pnpm install && pnpm dev                # http://localhost:5173
 ```
 
 - 전체 시연: `uv run ontology --domain liquor demo` (발주→배차→납품 재생)
@@ -58,6 +64,17 @@ cd apps/web && pnpm install && pnpm dev                # http://localhost:5173
 
 bakery는 liquor와 같은 PostgreSQL 인스턴스 안의 **다른 데이터베이스**를 쓰고,
 웹은 `/api/bakery` 프록시로 `localhost:8001` 백엔드에 붙습니다.
+
+```bash
+docker compose up -d db
+./bakery.sh    # DB 생성 → 마이그레이션 → 인덱스 → 빈 DB면 시드 → :8001 기동
+cd apps/web && pnpm dev    # 랜딩에서 베이커리 도메인 선택
+```
+
+`bakery.sh`는 다음 env로 재정의할 수 있다: `DATABASE_URL_BAKERY`(접속 문자열),
+`BAKERY_DB_NAME`(DB 이름, 기본 `ontology_bakery`).
+
+수동으로 할 때는:
 
 ```bash
 # 1) bakery 전용 DB 생성 (최초 1회)
@@ -74,9 +91,6 @@ DATABASE_URL_BAKERY=$BAKERY_DB uv run ontology --domain bakery seed --seed 42
 # 3) API (포트 8001)
 ONTOLOGY_DOMAIN=bakery DATABASE_URL_BAKERY=$BAKERY_DB \
   uv run uvicorn ontology_runtime.api.app:app --port 8001
-
-# 4) 웹 콘솔
-cd apps/web && pnpm dev          # 랜딩에서 베이커리 도메인 선택
 ```
 
 - 전체 시연: `DATABASE_URL_BAKERY=$BAKERY_DB uv run ontology --domain bakery demo`
@@ -94,6 +108,9 @@ curl -s -X POST localhost:8001/api/agents/bakeryOpsAgent/invoke \
 ```
 
 ### 두 도메인 동시 실행
+
+터미널 두 개에서 `./liquor.sh`와 `./bakery.sh`를 각각 실행하면 된다. 스크립트가 도메인과
+DB 접속을 고정하므로 env 누락으로 두 인스턴스가 한 DB를 공유하는 사고를 막는다.
 
 | | liquor | bakery |
 |---|---|---|
