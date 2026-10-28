@@ -12,8 +12,13 @@ LIVE_STATUSES = {"planned", "baked"}
 
 
 async def expiring_batches(context: EditContext, withinDays: int = 3) -> dict[str, Any]:
-    """Return live batches whose expiry falls within `withinDays` of today."""
+    """Return live batches whose expiry falls within `withinDays` of today.
+
+    Rows carry both the display name (`product`) and the rid (`productRid`):
+    humans read the name, agents reuse the rid to propose actions.
+    """
     horizon = dt.date.today() + dt.timedelta(days=int(withinDays))
+    product_names: dict[str, str] = {}
     rows: list[dict[str, Any]] = []
     for batch in await context.search("Batch"):
         if batch.properties.get("status") not in LIVE_STATUSES:
@@ -24,11 +29,18 @@ async def expiring_batches(context: EditContext, withinDays: int = 3) -> dict[st
         expires_on = dt.date.fromisoformat(str(expires))
         if expires_on > horizon:
             continue
+        product_rid = str(batch.properties.get("productRid"))
+        if product_rid not in product_names:
+            product_obj = await context.get(product_rid)
+            product_names[product_rid] = (
+                str(product_obj.properties.get("name")) if product_obj else ""
+            )
         rows.append(
             {
                 "rid": batch.rid,
                 "batchNo": batch.properties.get("batchNo"),
-                "productRid": batch.properties.get("productRid"),
+                "product": product_names[product_rid],
+                "productRid": product_rid,
                 "quantity": batch.properties.get("quantity"),
                 "expiresOn": expires_on.isoformat(),
                 "daysLeft": (expires_on - dt.date.today()).days,

@@ -104,7 +104,12 @@ async def test_expiring_function_returns_only_live_batches(runtime: Runtime) -> 
 
     result = await runtime.run_function("expiringBatches", {"withinDays": 3})
     assert result["count"] == 1
-    assert result["batches"][0]["quantity"] == 6
+    row = result["batches"][0]
+    assert row["quantity"] == 6
+    # Agents quote these rows to humans: the display name must be resolved,
+    # not left as a rid the agent cannot confidently translate.
+    assert row["product"] == "크루아상"
+    assert row["productRid"].startswith("ri.bakery.object.product.")
 
 
 async def test_bakery_rejects_liquor_object_types(runtime: Runtime) -> None:
