@@ -8,6 +8,8 @@ export interface ActionProposalProperties {
   actionType: string;
   /** 파라미터 */
   params: unknown;
+  /** 확정파라미터 */
+  decidedParams?: unknown;
   /** 제안근거 */
   rationale: string;
   /** 신뢰도 */

@@ -16,6 +16,7 @@
 | proposalNo (제안번호) | string | O |  |
 | actionType (액션) | string | O | O |
 | params (파라미터) | json | O |  |
+| decidedParams (확정파라미터) | json |  |  |
 | rationale (제안근거) | text | O |  |
 | confidence (신뢰도) | decimal |  |  |
 | status (상태) | enum | O | O |

@@ -24,6 +24,11 @@ properties:
     displayName: 파라미터
     type: json
     required: true
+  decidedParams:
+    apiName: decidedParams
+    displayName: 확정파라미터
+    description: 승인 시 실제로 실행된 파라미터. 승인 시 수정이 없으면 params와 같다.
+    type: json
   rationale:
     apiName: rationale
     displayName: 제안근거

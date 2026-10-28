@@ -90,6 +90,8 @@ async def test_approval_executes_the_proposed_action(runtime: Runtime) -> None:
     updated = await runtime.objects.get(proposal.rid)
     assert updated.properties["status"] == "approved"
     assert updated.properties["approvedBy"] == "manager01"
+    # Without overrides, the decided params equal the proposed params.
+    assert updated.properties["decidedParams"] == updated.properties["params"]
 
 
 async def test_approval_and_action_share_one_audit_run(runtime: Runtime) -> None:
@@ -177,6 +179,13 @@ async def test_approval_with_override_params(runtime: Runtime) -> None:
     assert result.status == "succeeded", result.violations
     orders = await runtime.search("SalesOrder")
     assert orders.objects[0].properties["totalCases"] == 2
+
+    # The proposal must record what was actually approved, not what was proposed.
+    updated = await runtime.objects.get(proposal.rid)
+    assert updated.properties["decidedParams"]["lines"] == [
+        {"productRid": ids["product"], "cases": 2}
+    ]
+    assert updated.properties["params"]["lines"][0]["cases"] == 99
 
 
 async def test_invalid_proposal_params_block_approval(runtime: Runtime) -> None:

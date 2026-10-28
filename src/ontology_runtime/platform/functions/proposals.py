@@ -64,6 +64,7 @@ async def apply_approved_proposal(context: EditContext, params: dict[str, Any]) 
             "approvedBy": context.actor,
             "approvedAt": now,
             "decidedAt": now,
+            "decidedParams": proposed_params,
             "feedbackNote": params.get("note") or proposal.properties.get("feedbackNote"),
         },
     )

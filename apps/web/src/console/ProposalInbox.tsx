@@ -15,6 +15,7 @@ interface Proposal {
     status: string;
     violations?: Violation[] | null;
     params?: Record<string, unknown>;
+    decidedParams?: Record<string, unknown> | null;
     targetObjectType?: string;
     targetRid?: string;
     approvedBy?: string;
@@ -152,6 +153,15 @@ export function ProposalInbox({ api, domainName, assistantPath }: Props) {
 
               {violations.length > 0 && <ViolationBanner violations={violations} />}
 
+              {proposal.properties.status === 'approved' &&
+                proposal.properties.decidedParams != null &&
+                JSON.stringify(proposal.properties.decidedParams) !==
+                  JSON.stringify(proposal.properties.params) && (
+                  <div className="banner" style={{ padding: '6px 10px', fontSize: 12 }}>
+                    승인 시 파라미터가 수정되어 실행되었습니다. 아래는 확정값입니다.
+                  </div>
+                )}
+
               {editing === proposal.rid ? (
                 <>
                   <textarea
@@ -188,7 +198,16 @@ export function ProposalInbox({ api, domainName, assistantPath }: Props) {
                 </>
               ) : (
                 <>
-                  <pre>{JSON.stringify(proposal.properties.params ?? {}, null, 2)}</pre>
+                  <pre>
+                    {JSON.stringify(
+                      proposal.properties.status === 'approved' &&
+                        proposal.properties.decidedParams
+                        ? proposal.properties.decidedParams
+                        : (proposal.properties.params ?? {}),
+                      null,
+                      2,
+                    )}
+                  </pre>
                   {proposal.properties.status === 'proposed' && (
                     <div className="actions" style={{ marginTop: 10 }}>
                       <button
