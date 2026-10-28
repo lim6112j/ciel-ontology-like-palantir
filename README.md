@@ -12,7 +12,7 @@ Palantir Foundry의 **온톨로지(object type / link type / action type / funct
 
 - [구조 상세](구조상세.md) — 실행 경로, SchemaRegistry, 함수/액션 관계, 상태 전이,
   AI 에이전트의 역할, 스키마에서 생성되는 API·타입·문서·인덱스의 동작 방식
-- [온톨로지 스키마](docs/ontology.md) — 스키마에서 자동 생성되는 객체/링크/액션/함수/에이전트 요약
+- [온톨로지 스키마](docs/domains/liquor/ontology.md) — 스키마에서 자동 생성되는 객체/링크/액션/함수/에이전트 요약
 
 ## 빠른 시작
 
@@ -20,39 +20,80 @@ Palantir Foundry의 **온톨로지(object type / link type / action type / funct
 docker compose up -d db          # PostgreSQL 16 (포트 55432)
 uv sync
 uv run alembic upgrade head
-uv run ontology schema validate
-uv run ontology sync-indexes
-uv run ontology seed --seed 42
-uv run ontology export-client --out apps/web/src/generated
-uv run uvicorn ontology_runtime.api.app:app --reload      # http://localhost:8000
+uv run ontology domains                              # 도메인 목록
+uv run ontology --domain liquor schema validate
+uv run ontology --domain liquor sync-indexes
+uv run ontology --domain liquor seed --seed 42
+uv run ontology export-web                           # 도메인별 클라이언트 + 랜딩 매니페스트
+uv run uvicorn ontology_runtime.api.app:app --reload      # http://localhost:8000 (기본 도메인)
 cd apps/web && pnpm install && pnpm dev                    # http://localhost:5173
+```
+
+`--domain`은 서브커맨드 앞뒤 어디에나 올 수 있고, 생략하면 `ONTOLOGY_DOMAIN`(기본 `liquor`)을
+씁니다. 두 도메인을 동시에 띄울 때는 서로 다른 포트와 DB를 지정합니다.
+
+```bash
+ONTOLOGY_DOMAIN=bakery DATABASE_URL_BAKERY=postgresql+asyncpg://ontology:ontology@localhost:55432/ontology_bakery \
+  uv run uvicorn ontology_runtime.api.app:app --port 8001
 ```
 
 에이전트를 실제로 실행하려면 `OPENROUTER_API_KEY`가 필요합니다. 기본 테스트는 이 키 없이도
 돌고, 실제 호출 테스트만 `-m live`로 분리되어 있습니다.
 
-`uv run ontology demo`는 발주→배차→납품 시퀀스를 한 번에 재생하며, `uv run ontology docs`는
-스키마에서 `docs/ontology.md`를 생성합니다.
+`uv run ontology --domain liquor demo`는 발주→배차→납품 시퀀스를 한 번에 재생하며,
+`uv run ontology --domain liquor docs`는 스키마에서 `docs/domains/liquor/ontology.md`를 생성합니다.
 
 ## 구조
 
 ```
-ontology/schema/        # 온톨로지 정의 (16 object types, 25 links, 25 actions, 21 functions, 4 agents)
+ontology/
+  platform/             # 모든 도메인 공통 (ActionProposal/AgentRun, 제안 액션 3종)
+  domains/
+    liquor/             # 주류 도매 (16 object types, 25 links, 25 actions, 21 functions, 4 agents)
+    bakery/             # 베이커리 유통 (격리 예시: 같은 이름의 Product를 다른 속성으로 정의)
 src/ontology_runtime/
-  loader.py registry.py # YAML → 메타모델 → 역링크/인덱스 도출
+  loader.py registry.py # YAML → 메타모델 → 역링크/인덱스 도출 (도메인+플랫폼 병합)
   runtime.py            # 레지스트리 + 스토어 + 액션/함수 파사드
-  db/                   # 엔진·세션·테이블 (JSONB objects/links, 감사 로그)
+  db/                   # 엔진·세션·테이블 (JSONB objects/links, 감사 로그, 도메인별 엔진)
   store/                # JSONB 객체·링크 저장, 선언 인덱스 동기화
   query/                # allowlist 필터 DSL, object set, 집계
-  validation/          # Violation 형태, 객체 불변식
+  validation/          # Violation 형태, 범용 객체 불변식
   actions/              # EditBatch 단일 쓰기 경로 (검증·감사·멱등성)
-  functions/            # 읽기/쓰기 도메인 함수
+  functions/            # 함수 실행 레지스트리 (구현은 도메인 패키지에)
   agents/               # 에이전트 루프, 도구 표면, 가드레일, OpenRouter 어댑터
   api/                  # FastAPI (OSDK 형태)
-  seed/                 # 결정적 합성 데이터
-  clientgen/            # TypeScript 클라이언트 생성
-apps/web/               # React 운영 콘솔
+  domains/
+    liquor/             # 주류 도메인 함수·시드·데모
+    bakery/             # 베이커리 도메인 함수·시드
+  clientgen/            # TypeScript 클라이언트 + 웹 번들 생성
+apps/web/               # React 운영 콘솔 (랜딩 + 도메인별 콘솔)
 ```
+
+## 도메인 추가
+
+도메인은 `ontology/domains/<name>/domain.yaml` 하나로 식별됩니다.
+
+```yaml
+apiName: bakery
+displayName: 베이커리 유통
+ridNamespace: bakery                       # rid 접두사: ri.bakery.object....
+pythonPackage: ontology_runtime.domains.bakery
+web:
+  enabled: true
+  order: 20
+  tagline: 베이커리 생산·매장·배치 재고 콘솔
+  apiBase: /api/bakery                     # Vite 프록시가 /api/bakery → /api 로 rewrite
+  backendUrl: http://localhost:8001
+```
+
+1. `ontology/domains/<name>/` 에 object_types/·action_types/·link_types/·functions/·agents/ 작성
+2. `uv run ontology --domain <name> schema validate`
+3. `uv run ontology export-web` — 도메인 클라이언트 + 랜딩 매니페스트(`domains.json`) 생성
+4. 끝. 전용 화면이 필요하면 `apps/web/src/domains/<name>/`에 페이지를 두고 `index.ts`의
+   `extraNav` / `extraRoutes`에 등록합니다. 없으면 공통 콘솔(스키마·객체·인박스·채팅)로 동작합니다.
+
+`ActionProposal` / `AgentRun` / 제안 액션 3종은 `ontology/platform/`에서 모든 도메인에
+자동 병합되며, 도메인이 같은 이름을 재정의하면 스키마 로드가 실패합니다.
 
 ## 핵심 설계
 
@@ -68,8 +109,8 @@ apps/web/               # React 운영 콘솔
 운영자가 승인하면 그때 `ActionService.apply()`가 기존 검증·감사 경로로 실행되고,
 `action_runs`/`action_edits`에 승인자와 함께 기록됩니다.
 
-**온톨로지가 UI 타입을 만든다.** `uv run ontology export-client`가 스키마에서
-TypeScript 타입과 클라이언트를 생성합니다. 속성/액션 추가 후 재생성만 하면 됩니다.
+**온톨로지가 UI 타입을 만든다.** `uv run ontology export-web`가 도메인별 TypeScript 타입·
+클라이언트와 랜딩 매니페스트를 생성합니다. 속성/액션 추가 후 재생성만 하면 됩니다.
 
 ## 에이전트
 
@@ -88,7 +129,7 @@ LLM이 문제를 발명하지 않게 해 재현성을 확보합니다.
 있습니다. 어떤 모델을 썼는지는 `AgentRun.model`에 실행 단위로 기록됩니다.
 
 ```yaml
-# ontology/schema/agents/opsCopilotAgent.yaml
+# ontology/domains/liquor/agents/opsCopilotAgent.yaml
 apiName: opsCopilotAgent
 model: anthropic/claude-opus-5-5
 fallbackModel: deepseek/deepseek-v4.1-flash-1017

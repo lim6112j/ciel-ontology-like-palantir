@@ -1,0 +1,42 @@
+functions:
+- apiName: upsertOutlet
+  displayName: 거래처 등록/수정
+  description: 거래처를 신규 등록하거나 갱신한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.master_data.upsert_outlet
+  parameters:
+    outletNo:
+      apiName: outletNo
+      type: string
+      required: false
+    name:
+      apiName: name
+      type: string
+    outletType:
+      apiName: outletType
+      type: enum
+      values:
+      - 소매점
+      - 일반음식점
+      - 유흥주점
+      - 편의점
+      - 마트
+      - 실수요자
+    address:
+      apiName: address
+      type: string
+      required: false
+    deliveryWeekday:
+      apiName: deliveryWeekday
+      type: integer
+      required: false
+    depot:
+      apiName: depot
+      type: objectRef
+      objectType: Depot
+      required: false
+    salesRep:
+      apiName: salesRep
+      type: objectRef
+      objectType: SalesRep
+      required: false

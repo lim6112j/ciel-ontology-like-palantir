@@ -1,0 +1,19 @@
+functions:
+- apiName: reassignStop
+  displayName: 정류장 재배차
+  description: 정류장을 다른 배송으로 옮기고 순번을 재정렬한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery_ops.reassign_stop
+  parameters:
+    stop:
+      apiName: stop
+      type: objectRef
+      objectType: DeliveryStop
+    targetDelivery:
+      apiName: targetDelivery
+      type: objectRef
+      objectType: Delivery
+    sequence:
+      apiName: sequence
+      type: integer
+      required: false

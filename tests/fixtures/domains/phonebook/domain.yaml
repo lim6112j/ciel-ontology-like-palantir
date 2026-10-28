@@ -1,0 +1,4 @@
+apiName: phonebook
+displayName: 전화번호부
+description: 가장 작은 도메인 예제. 테스트가 tmp_path로 복사해 쓴다.
+ridNamespace: phonebook

@@ -1,0 +1,39 @@
+functions:
+- apiName: createSalesOrder
+  displayName: 발주 생성
+  description: 초안 발주와 라인을 만들고 합계를 계산한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.orders.create_sales_order
+  parameters:
+    outlet:
+      apiName: outlet
+      type: objectRef
+      objectType: Outlet
+    salesRep:
+      apiName: salesRep
+      type: objectRef
+      objectType: SalesRep
+      required: false
+    orderDate:
+      apiName: orderDate
+      type: date
+    requestedDeliveryDate:
+      apiName: requestedDeliveryDate
+      type: date
+      required: false
+    channel:
+      apiName: channel
+      type: enum
+      values:
+      - phone
+      - message
+      - app
+      - agent
+      required: false
+    lines:
+      apiName: lines
+      type: json
+    note:
+      apiName: note
+      type: text
+      required: false

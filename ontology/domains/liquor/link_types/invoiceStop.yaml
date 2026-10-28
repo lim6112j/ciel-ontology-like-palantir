@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: invoiceStop
+  displayName: 납품정류장
+  fromObjectType: SalesInvoice
+  fromApiName: stop
+  fromCardinality: one
+  toObjectType: DeliveryStop
+  toApiName: invoice
+  toCardinality: one

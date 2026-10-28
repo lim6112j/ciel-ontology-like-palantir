@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: deliveryDriver
+  displayName: 기사
+  fromObjectType: Delivery
+  fromApiName: driver
+  fromCardinality: one
+  toObjectType: Driver
+  toApiName: deliveries
+  toCardinality: many

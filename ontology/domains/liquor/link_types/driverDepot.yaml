@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: driverDepot
+  displayName: 소속창고
+  fromObjectType: Driver
+  fromApiName: depot
+  fromCardinality: one
+  toObjectType: Depot
+  toApiName: drivers
+  toCardinality: many

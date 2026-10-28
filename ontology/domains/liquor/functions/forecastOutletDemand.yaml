@@ -1,0 +1,17 @@
+functions:
+- apiName: forecastOutletDemand
+  displayName: 거래처 수요 예측
+  description: 최근 4주 이동평균으로 거래처·제품별 케이스 수요를 추정한다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.analytics.forecast_outlet_demand
+  parameters:
+    outlet:
+      apiName: outlet
+      type: objectRef
+      objectType: Outlet
+      required: true
+    weeks:
+      apiName: weeks
+      type: integer
+      required: false

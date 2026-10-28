@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import datetime as dt
+import shutil
 from collections.abc import AsyncIterator
 from pathlib import Path
 
 import pytest
-import yaml
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import text
@@ -57,85 +57,22 @@ async def session(database_url: str) -> AsyncIterator[AsyncSession]:
     await engine.dispose()
 
 
-PHONE_BOOK_SCHEMA = {
-    "object_types/Outlet.yaml": {
-        "apiName": "Outlet",
-        "displayName": "거래처",
-        "primaryKey": "name",
-        "properties": {
-            "name": {"apiName": "name", "type": "string", "required": True},
-            "outletType": {
-                "apiName": "outletType",
-                "type": "enum",
-                "values": ["소매점", "음식점"],
-                "required": True,
-            },
-            "status": {
-                "apiName": "status",
-                "type": "enum",
-                "values": ["active", "closed"],
-                "required": True,
-                "indexed": True,
-                "defaultValue": "active",
-            },
-            "deliveryWeekday": {"apiName": "deliveryWeekday", "type": "integer", "indexed": True},
-        },
-        "stateMachine": {
-            "property": "status",
-            "initial": "active",
-            "transitions": [
-                {"from": "active", "to": "closed"},
-                {"from": "closed", "to": "active"},
-            ],
-        },
-    },
-    "object_types/Order.yaml": {
-        "apiName": "Order",
-        "displayName": "발주",
-        "primaryKey": "orderNo",
-        "properties": {
-            "orderNo": {"apiName": "orderNo", "type": "string", "required": True},
-            "outletRid": {"apiName": "outletRid", "type": "objectRef", "objectType": "Outlet"},
-            "totalAmount": {"apiName": "totalAmount", "type": "integer", "indexed": True},
-            "status": {
-                "apiName": "status",
-                "type": "enum",
-                "values": ["draft", "submitted"],
-                "required": True,
-                "indexed": True,
-                "defaultValue": "draft",
-            },
-        },
-    },
-    "link_types.yaml": {
-        "linkTypes": [
-            {
-                "apiName": "orders",
-                "displayName": "발주",
-                "fromObjectType": "Outlet",
-                "fromApiName": "orders",
-                "fromCardinality": "many",
-                "toObjectType": "Order",
-                "toApiName": "outlet",
-                "toCardinality": "one",
-            }
-        ]
-    },
-}
+#: A minimal, real-on-disk domain fixture. Copying it into `tmp_path` keeps the
+#: loader's "manifest name must match directory" check honest while isolating
+#: mutations between tests.
+PHONE_BOOK_FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "domains" / "phonebook"
 
 
 @pytest.fixture
 def demo_schema(tmp_path: Path) -> Path:
-    root = tmp_path / "schema"
-    for relative, payload in PHONE_BOOK_SCHEMA.items():
-        path = root / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(yaml.safe_dump(payload, allow_unicode=True), encoding="utf-8")
+    root = tmp_path / "phonebook"
+    shutil.copytree(PHONE_BOOK_FIXTURE, root)
     return root
 
 
 @pytest.fixture
 def demo_registry(demo_schema: Path) -> SchemaRegistry:
+    """A manifest-less registry: these tests exercise the bare store/query layer."""
     return SchemaRegistry.from_directory(demo_schema)
 
 

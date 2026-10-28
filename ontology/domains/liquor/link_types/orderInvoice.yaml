@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: orderInvoice
+  displayName: 판매계산서
+  fromObjectType: SalesOrder
+  fromApiName: invoices
+  fromCardinality: many
+  toObjectType: SalesInvoice
+  toApiName: order
+  toCardinality: one

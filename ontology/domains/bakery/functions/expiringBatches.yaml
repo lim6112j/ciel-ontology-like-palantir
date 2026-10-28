@@ -1,0 +1,12 @@
+functions:
+  - apiName: expiringBatches
+    displayName: 소비기한 임박 배치
+    description: 지정한 일수 안에 소비기한이 도래하는 배치를 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.bakery.functions.read.stock.expiring_batches
+    parameters:
+      withinDays:
+        apiName: withinDays
+        type: integer
+        required: true

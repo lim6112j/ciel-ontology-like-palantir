@@ -1,0 +1,11 @@
+apiName: liquor
+displayName: 주류 도매
+description: 한국 주류 도매 사업자의 영업·발주·배차·납품 온톨로지.
+ridNamespace: liquor
+pythonPackage: ontology_runtime.domains.liquor
+web:
+  enabled: true
+  order: 10
+  tagline: 주류 도매 영업·배차·납품 운영 콘솔
+  apiBase: /api/liquor
+  backendUrl: http://localhost:8000

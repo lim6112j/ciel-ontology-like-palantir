@@ -1,0 +1,20 @@
+functions:
+- apiName: planDeliveries
+  displayName: 배송 계획 수립
+  description: 확정 발주를 요일·창고로 묶어 최근접 순회로 동선을 만들고 배송·정류장을 생성한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery.plan_deliveries
+  parameters:
+    deliveryDate:
+      apiName: deliveryDate
+      type: date
+      required: true
+    depot:
+      apiName: depot
+      type: objectRef
+      objectType: Depot
+      required: true
+    maxStopsPerVehicle:
+      apiName: maxStopsPerVehicle
+      type: integer
+      required: false

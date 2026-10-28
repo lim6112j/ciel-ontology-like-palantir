@@ -1,0 +1,58 @@
+apiName: Batch
+displayName: 생산배치
+pluralDisplayName: 생산배치
+description: 한 번의 생산 실행. 제품·수량·생산일·소비기한을 기록한다.
+primaryKey: batchNo
+properties:
+  batchNo:
+    apiName: batchNo
+    displayName: 배치번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true
+  producedOn:
+    apiName: producedOn
+    displayName: 생산일
+    type: date
+    required: true
+    indexed: true
+  expiresOn:
+    apiName: expiresOn
+    displayName: 소비기한
+    type: date
+    required: true
+    indexed: true
+  quantity:
+    apiName: quantity
+    displayName: 생산수량
+    type: integer
+    required: true
+    min: 0
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [planned, baked, shipped, wasted]
+    required: true
+    indexed: true
+    defaultValue: planned
+stateMachine:
+  property: status
+  initial: planned
+  transitions:
+    - from: planned
+      to: baked
+    - from: baked
+      to: shipped
+    - from: baked
+      to: wasted
+    - from: planned
+      to: wasted

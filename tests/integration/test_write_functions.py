@@ -7,15 +7,14 @@ import datetime as dt
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ontology_runtime.config import SCHEMA_DIR
-from ontology_runtime.functions.write.proposals import apply_approved_proposal
+from ontology_runtime.platform.functions.proposals import apply_approved_proposal
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.runtime import Runtime
 
 
 @pytest.fixture
 def runtime(session: AsyncSession) -> Runtime:
-    return Runtime(SchemaRegistry.from_directory(SCHEMA_DIR), session)
+    return Runtime(SchemaRegistry.from_domain("liquor"), session)
 
 
 async def _world(runtime: Runtime) -> dict[str, str]:

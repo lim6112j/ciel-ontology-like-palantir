@@ -1,0 +1,17 @@
+functions:
+- apiName: detectDeliveryExceptions
+  displayName: 배송 예외 탐지
+  description: 지연·실패 정류장, 용량 초과, 미배정 발주를 결정적으로 찾아낸다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.delivery.detect_delivery_exceptions
+  parameters:
+    deliveryDate:
+      apiName: deliveryDate
+      type: date
+      required: true
+    depot:
+      apiName: depot
+      type: objectRef
+      objectType: Depot
+      required: false

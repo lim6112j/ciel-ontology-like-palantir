@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: outletStops
+  displayName: 납품이력
+  fromObjectType: Outlet
+  fromApiName: stops
+  fromCardinality: many
+  toObjectType: DeliveryStop
+  toApiName: outlet
+  toCardinality: one

@@ -1,0 +1,24 @@
+functions:
+- apiName: reassignDriver
+  displayName: 기사 재배정
+  description: 배송의 기사·차량을 교체한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery_ops.reassign_driver
+  parameters:
+    delivery:
+      apiName: delivery
+      type: objectRef
+      objectType: Delivery
+    driver:
+      apiName: driver
+      type: objectRef
+      objectType: Driver
+    vehicle:
+      apiName: vehicle
+      type: objectRef
+      objectType: Vehicle
+      required: false
+    reason:
+      apiName: reason
+      type: text
+      required: false

@@ -10,7 +10,6 @@ from typing import Any
 from sqlalchemy import literal, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ontology_runtime.config import settings
 from ontology_runtime.db.models import ObjectRow
 from ontology_runtime.errors import NotFoundError, VersionConflict
 from ontology_runtime.meta import ObjectTypeDef
@@ -55,9 +54,13 @@ class ValidationReport:
         self.violations.append({"code": code, "path": path, "message": message, **extra})
 
 
-def new_rid(object_type: str, namespace: str | None = None) -> str:
-    ns = namespace or settings.rid_namespace
-    return f"ri.{ns}.object.{object_type.lower()}.{uuid.uuid4().hex[:24]}"
+def new_rid(object_type: str, namespace: str) -> str:
+    """Mint an object rid: `ri.<namespace>.object.<type>.<id>`.
+
+    The namespace is supplied by the registry (from `domain.yaml`), never read
+    from a global setting, so two domains cannot stamp the same prefix.
+    """
+    return f"ri.{namespace}.object.{object_type.lower()}.{uuid.uuid4().hex[:24]}"
 
 
 def _iso(value: dt.datetime | None) -> str | None:
@@ -149,7 +152,7 @@ class ObjectStore:
 
             raise ValidationFailed(report.violations)
 
-        rid = rid or new_rid(object_type)
+        rid = rid or new_rid(object_type, self.registry.namespace)
         row = ObjectRow(rid=rid, object_type=object_type, properties=coerced, version=1)
         self.session.add(row)
         await self.session.flush()

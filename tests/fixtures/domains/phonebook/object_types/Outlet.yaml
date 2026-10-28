@@ -1,0 +1,32 @@
+apiName: Outlet
+displayName: 거래처
+primaryKey: name
+properties:
+  name:
+    apiName: name
+    type: string
+    required: true
+  outletType:
+    apiName: outletType
+    type: enum
+    values: [소매점, 음식점]
+    required: true
+  status:
+    apiName: status
+    type: enum
+    values: [active, closed]
+    required: true
+    indexed: true
+    defaultValue: active
+  deliveryWeekday:
+    apiName: deliveryWeekday
+    type: integer
+    indexed: true
+stateMachine:
+  property: status
+  initial: active
+  transitions:
+    - from: active
+      to: closed
+    - from: closed
+      to: active

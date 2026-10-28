@@ -1,0 +1,21 @@
+functions:
+- apiName: driverPerformance
+  displayName: 기사 실적
+  description: 기간 내 완료 정류장, 정시율, 배송 케이스를 집계한다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.analytics.driver_performance
+  parameters:
+    from:
+      apiName: from
+      type: date
+      required: true
+    to:
+      apiName: to
+      type: date
+      required: true
+    driver:
+      apiName: driver
+      type: objectRef
+      objectType: Driver
+      required: false

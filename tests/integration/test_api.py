@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from ontology_runtime.api.app import create_app
 from ontology_runtime.db import engine as engine_module
-from ontology_runtime.seed.generator import SeedGenerator
+from ontology_runtime.domains.liquor.seed.generator import SeedGenerator
 
 pytestmark = pytest.mark.asyncio(loop_scope="module")
 
@@ -30,7 +30,8 @@ async def client(api_database_url: str):
 
     engine = create_async_engine(api_database_url)
     factory = async_sessionmaker(engine, expire_on_commit=False)
-    engine_module._session_factory = factory  # noqa: SLF001 - test wiring
+    # Engines are keyed per domain; point the default (liquor) at the test DB.
+    engine_module._session_factories["liquor"] = factory  # noqa: SLF001 - test wiring
 
     app = create_app()
     async with factory() as setup_session:
@@ -58,7 +59,7 @@ async def client(api_database_url: str):
                 )
             )
             await cleanup_session.commit()
-    engine_module._session_factory = None  # noqa: SLF001
+    engine_module._session_factories.pop("liquor", None)  # noqa: SLF001
     await engine.dispose()
 
 
@@ -67,8 +68,17 @@ async def test_health(client: AsyncClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["success"] is True
+    assert body["data"]["domain"] == "liquor"
     assert body["data"]["objectTypes"] == 16
     assert body["data"]["agents"] == 4
+
+
+async def test_health_alias_under_api_prefix(client: AsyncClient) -> None:
+    # Generated clients call `/api/<domain>/health`, which the proxy rewrites to
+    # `/api/health`; the alias must answer the same payload.
+    response = await client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json()["data"]["domain"] == "liquor"
 
 
 async def test_list_object_types(client: AsyncClient) -> None:

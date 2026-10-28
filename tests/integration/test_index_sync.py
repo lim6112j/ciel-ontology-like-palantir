@@ -21,9 +21,9 @@ async def _index_names(session: AsyncSession) -> set[str]:
 
 def test_index_expressions_use_declared_casts(demo_registry: SchemaRegistry) -> None:
     specs = {spec.name: spec for spec in demo_registry.indexes()}
-    status = specs["ix_ont_outlet_status"]
+    status = specs["ix_phonebook_outlet_status"]
     assert status.expressions == ("((properties->>'status')::text)",)
-    weekday = specs["ix_ont_outlet_deliveryweekday"]
+    weekday = specs["ix_phonebook_outlet_deliveryweekday"]
     assert weekday.expressions == ("((properties->>'deliveryWeekday')::integer)",)
     assert "object_type = 'Outlet'" in status.ddl()
     assert "deleted_at IS NULL" in status.ddl()
@@ -32,12 +32,12 @@ def test_index_expressions_use_declared_casts(demo_registry: SchemaRegistry) -> 
 async def test_sync_creates_indexes(demo_registry: SchemaRegistry, session: AsyncSession) -> None:
     sync = IndexSync(demo_registry, session)
     result = await sync.sync()
-    assert "ix_ont_outlet_status" in result.created
+    assert "ix_phonebook_outlet_status" in result.created
     assert await _index_names(session) >= {
-        "ix_ont_outlet_status",
-        "ix_ont_outlet_deliveryweekday",
-        "ix_ont_order_totalamount",
-        "ix_ont_order_status",
+        "ix_phonebook_outlet_status",
+        "ix_phonebook_outlet_deliveryweekday",
+        "ix_phonebook_order_totalamount",
+        "ix_phonebook_order_status",
     }
 
 
@@ -54,7 +54,7 @@ async def test_sync_drops_stale_indexes(
 ) -> None:
     sync = IndexSync(demo_registry, session)
     await sync.sync()
-    assert "ix_ont_order_status" in await _index_names(session)
+    assert "ix_phonebook_order_status" in await _index_names(session)
 
     outlet_file = demo_schema / "object_types" / "Order.yaml"
     payload = yaml.safe_load(outlet_file.read_text(encoding="utf-8"))
@@ -63,5 +63,5 @@ async def test_sync_drops_stale_indexes(
 
     shrunk = SchemaRegistry.from_directory(demo_schema)
     result = await IndexSync(shrunk, session).sync()
-    assert "ix_ont_order_status" in result.dropped
-    assert "ix_ont_order_status" not in await _index_names(session)
+    assert "ix_phonebook_order_status" in result.dropped
+    assert "ix_phonebook_order_status" not in await _index_names(session)

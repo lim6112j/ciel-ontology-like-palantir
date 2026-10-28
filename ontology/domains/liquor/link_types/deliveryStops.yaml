@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: deliveryStops
+  displayName: 정류장
+  fromObjectType: Delivery
+  fromApiName: stops
+  fromCardinality: many
+  toObjectType: DeliveryStop
+  toApiName: delivery
+  toCardinality: one

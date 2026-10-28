@@ -15,6 +15,7 @@ from ontology_runtime.errors import SchemaError
 from ontology_runtime.meta import (
     ActionTypeDef,
     AgentDef,
+    DomainManifest,
     FunctionDef,
     FunctionKind,
     LinkTypeDef,
@@ -24,7 +25,12 @@ from ontology_runtime.meta import (
 
 
 class SchemaBundle:
-    """The loaded, cross-validated ontology schema."""
+    """The loaded, cross-validated ontology schema.
+
+    A bundle is one domain's definitions plus the platform definitions every
+    domain needs (agent bookkeeping). The two layers are kept in separate dicts
+    so a domain cannot silently shadow a platform name.
+    """
 
     def __init__(
         self,
@@ -34,6 +40,8 @@ class SchemaBundle:
         functions: dict[str, FunctionDef],
         agents: dict[str, AgentDef],
         interfaces: dict[str, dict[str, Any]] | None = None,
+        *,
+        domain: DomainManifest | None = None,
     ) -> None:
         self.object_types = object_types
         self.link_types = link_types
@@ -42,9 +50,16 @@ class SchemaBundle:
         self.agents = agents
         #: Reserved: interface names only. No runtime semantics in v1.
         self.interfaces = interfaces or {}
+        #: The domain manifest this bundle was assembled for.
+        self.domain = domain
+
+    @property
+    def domain_name(self) -> str:
+        return self.domain.apiName if self.domain else "default"
 
     def schema_hash(self) -> str:
         payload = {
+            "domain": self.domain_name,
             "objectTypes": {
                 k: v.model_dump(mode="json") for k, v in sorted(self.object_types.items())
             },
@@ -70,14 +85,63 @@ def _profile(spec: type, data: dict[str, Any], source: str) -> Any:
 
 
 def _iter_files(directory: Path, pattern: str) -> Iterable[Path]:
-    return sorted(directory.glob(pattern)) if directory.is_dir() else []
+    """Yield YAML files under `directory`, recursing into subdirectories.
+
+    A single flat directory is the common case; recursion lets a domain group
+    definitions (e.g. `link_types/orders/`) without changing the loader.
+    """
+    if not directory.is_dir():
+        return []
+    return sorted(
+        {
+            path
+            for pattern_ in (pattern, pattern.replace(".yaml", ".yml"))
+            for path in directory.rglob(pattern_)
+        }
+    )
 
 
-def load_schema(schema_dir: Path) -> SchemaBundle:
+def load_manifest(schema_dir: Path) -> DomainManifest | None:
+    """Read `domain.yaml` if present. A missing manifest means an unnamed schema."""
+    path = schema_dir / "domain.yaml"
+    if not path.exists():
+        return None
+    data = _read_yaml(path)
+    if not isinstance(data, dict):
+        raise SchemaError(f"{path.name}: expected a mapping at the document root")
+    try:
+        manifest = DomainManifest(**data)
+    except ValidationError as exc:
+        raise SchemaError(f"{path.name}: {exc}") from exc
+    if manifest.apiName != schema_dir.name:
+        raise SchemaError(
+            f"{path.name}: apiName {manifest.apiName!r} does not match "
+            f"directory {schema_dir.name!r}"
+        )
+    return manifest
+
+
+def load_schema(schema_dir: Path, *, platform_dir: Path | None = None) -> SchemaBundle:
     """Parse schema files and enforce referential integrity.
+
+    `platform_dir` holds definitions every domain shares (agent bookkeeping).
+    It is loaded first, then the domain's definitions are merged on top, with a
+    hard check that the domain does not shadow a platform name.
 
     Raises SchemaError with a readable message on the first problem found.
     """
+    manifest = load_manifest(schema_dir)
+    bundle = _load_tree(schema_dir, domain=manifest)
+
+    if platform_dir is not None and platform_dir.is_dir():
+        platform = _load_tree(platform_dir)
+        bundle = _merge_platform(bundle, platform, schema_dir.name)
+
+    _validate_references(bundle)
+    return bundle
+
+
+def _load_tree(schema_dir: Path, *, domain: DomainManifest | None = None) -> SchemaBundle:
     object_types = _load_object_types(schema_dir)
     functions = _load_collection(
         schema_dir / "functions.yaml", "functions", FunctionDef, "function"
@@ -90,10 +154,47 @@ def load_schema(schema_dir: Path) -> SchemaBundle:
     )
     agents = _load_agents(schema_dir)
     interfaces = _load_interfaces(schema_dir)
+    return SchemaBundle(
+        object_types,
+        link_types,
+        action_types,
+        functions,
+        agents,
+        interfaces,
+        domain=domain,
+    )
 
-    bundle = SchemaBundle(object_types, link_types, action_types, functions, agents, interfaces)
-    _validate_references(bundle)
-    return bundle
+
+#: Definition collections that must not collide between platform and domain.
+_COLLECTION_ATTRS = ("object_types", "link_types", "action_types", "functions", "agents")
+
+
+def _merge_platform(domain: SchemaBundle, platform: SchemaBundle, domain_name: str) -> SchemaBundle:
+    """Return a bundle with platform definitions merged in, rejecting shadows."""
+    merged: dict[str, dict[str, Any]] = {}
+    for attr in _COLLECTION_ATTRS:
+        platform_items: dict[str, Any] = getattr(platform, attr)
+        domain_items: dict[str, Any] = getattr(domain, attr)
+        overlap = set(platform_items) & set(domain_items)
+        if overlap:
+            kind = attr.removesuffix("s").replace("_", " ")
+            name = sorted(overlap)[0]
+            raise SchemaError(
+                f"domain {domain_name!r} redefines platform {kind} {name!r}; "
+                "platform definitions cannot be overridden"
+            )
+        merged[attr] = {**platform_items, **domain_items}
+
+    interfaces = {**platform.interfaces, **domain.interfaces}
+    return SchemaBundle(
+        merged["object_types"],
+        merged["link_types"],
+        merged["action_types"],
+        merged["functions"],
+        merged["agents"],
+        interfaces,
+        domain=domain.domain,
+    )
 
 
 def _load_object_types(
@@ -116,16 +217,30 @@ def _load_object_types(
 
 
 def _load_collection(path: Path, key: str, spec: type, kind: str) -> dict[str, Any]:
-    """Load a list-of-definitions YAML file (functions, links, interfaces)."""
-    if not path.exists():
-        return {}
-    raw = _read_yaml(path)
-    entries = raw.get(key, []) if isinstance(raw, dict) else raw
+    """Load definitions from `<name>.yaml` and/or a sibling directory.
+
+    A single list file is the legacy layout; a directory of one-definition-per-
+    file (each holding either a bare mapping or a one-item list under `key`)
+    avoids a merge hotspot when several domains evolve in parallel.
+    """
     loaded: dict[str, Any] = {}
-    for entry in entries or []:
-        definition = _profile(spec, entry, path.name)
-        _ensure_unique(loaded, definition.apiName, path.name, kind)
-        loaded[definition.apiName] = definition
+
+    sources: list[Path] = []
+    if path.exists():
+        sources.append(path)
+    directory = path.with_suffix("")
+    if directory.is_dir():
+        sources.extend(_iter_files(directory, "*.yaml"))
+
+    for source in sources:
+        raw = _read_yaml(source)
+        entries = raw.get(key, []) if isinstance(raw, dict) and key in raw else raw
+        if isinstance(entries, dict):
+            entries = [entries]
+        for entry in entries or []:
+            definition = _profile(spec, entry, source.name)
+            _ensure_unique(loaded, definition.apiName, source.name, kind)
+            loaded[definition.apiName] = definition
     return loaded
 
 
@@ -147,20 +262,35 @@ def _load_agents(schema_dir: Path) -> dict[str, AgentDef]:
 
 
 def _load_interfaces(schema_dir: Path) -> dict[str, dict[str, Any]]:
-    """Reserved: names only, no runtime semantics in v1."""
-    path = schema_dir / "interfaces.yaml"
-    if not path.exists():
-        return {}
-    raw = _read_yaml(path)
-    entries = raw.get("interfaces", []) if isinstance(raw, dict) else raw
+    """Reserved: names only, no runtime semantics in v1.
+
+    Accepts either `interfaces.yaml` (list under `interfaces:`) or an
+    `interfaces/` directory of one-definition-per-file YAML.
+    """
     interfaces: dict[str, dict[str, Any]] = {}
-    for entry in entries or []:
-        name = entry.get("apiName")
-        if not name:
-            raise SchemaError(f"{path.name}: interface entry is missing apiName")
-        _ensure_unique(interfaces, name, path.name, "interface")
-        interfaces[name] = entry
+    path = schema_dir / "interfaces.yaml"
+    if path.exists():
+        raw = _read_yaml(path)
+        entries = raw.get("interfaces", []) if isinstance(raw, dict) else raw
+        for entry in entries or []:
+            _add_interface(interfaces, entry, path.name)
+
+    for file in _iter_files(schema_dir / "interfaces", "*.yaml"):
+        raw = _read_yaml(file)
+        entries = raw.get("interfaces", []) if isinstance(raw, dict) else raw
+        for entry in entries or []:
+            _add_interface(interfaces, entry, file.name)
     return interfaces
+
+
+def _add_interface(seen: dict[str, dict[str, Any]], entry: Any, source: str) -> None:
+    if not isinstance(entry, dict):
+        raise SchemaError(f"{source}: interface entry must be a mapping")
+    name = entry.get("apiName")
+    if not name:
+        raise SchemaError(f"{source}: interface entry is missing apiName")
+    _ensure_unique(seen, name, source, "interface")
+    seen[name] = entry
 
 
 def _ensure_unique(seen: dict[str, Any], name: str, source: str, kind: str) -> None:

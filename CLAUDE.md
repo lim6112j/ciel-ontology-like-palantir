@@ -20,9 +20,11 @@ code identifiers are English.
 - DB up: `docker compose up -d db`
 - Sync deps: `uv sync`
 - Migrate: `uv run alembic upgrade head`
-- Validate schema: `uv run ontology schema validate`
-- Seed: `uv run ontology seed --seed 42`
-- Run API: `uv run uvicorn ontology_runtime.api.app:app --reload`
+- List domains: `uv run ontology domains`
+- Validate schema: `uv run ontology --domain <name> schema validate`
+- Seed: `uv run ontology --domain <name> seed --seed 42`
+- Generate web: `uv run ontology export-web` (all domains + landing manifest)
+- Run API: `uv run uvicorn ontology_runtime.api.app:app --reload` (serves `ONTOLOGY_DOMAIN`)
 - Run web: `cd apps/web && pnpm dev`
 - Unit tests: `uv run pytest tests/unit tests/test_version.py -q`
 - All tests (needs DB): `uv run pytest -q`
@@ -34,20 +36,31 @@ code identifiers are English.
 
 ## Project Structure
 
-- `ontology/schema/` — **source of truth**: object_types/, action_types/ (one file each),
-  plus `link_types.yaml`, `functions.yaml`, `interfaces.yaml`, `agents/`, `prompts/`
+- `ontology/platform/` — definitions every domain shares (`ActionProposal`, `AgentRun`,
+  the three proposal actions, `applyApprovedProposal`). Domains may not redefine these.
+- `ontology/domains/<name>/` — **source of truth** for one domain: `domain.yaml` manifest,
+  object_types/, action_types/, link_types/, functions/ (one file each), agents/, prompts/
 - `src/ontology_runtime/` — loader → registry → runtime facade; `db/`, `store/`,
-  `query/`, `validation/`, `actions/`, `functions/`, `agents/`, `api/`, `seed/`, `clientgen/`
-- `apps/web/` — React ops console; `src/generated/` is generated, never hand-edit
-- `migrations/` — Alembic; one core migration
+  `query/`, `validation/`, `actions/`, `functions/`, `agents/`, `api/`, `clientgen/`
+- `src/ontology_runtime/domains/<name>/` — domain-specific Python (functions, seed, demo,
+  invariants). The platform core must not import these.
+- `apps/web/` — React console: a landing page plus a per-domain console. `src/generated/` is
+  generated, never hand-edit; `src/domains/<name>/` holds optional extra screens.
+- `migrations/` — Alembic; one core migration (generic JSONB, no domain schema)
 - `tests/` — `unit/` (no DB), `integration/` (PostgreSQL), `live/` (opt-in LLM), `e2e/`
-- `docs/ontology.md` — generated from the schema
+- `docs/domains/<name>/ontology.md` — generated from that domain's schema
 
 ## Conventions
 
-- **YAML first.** Add/change object types, actions, links, functions, agents in
-  `ontology/schema/`, then regenerate: `uv run ontology export-client --out apps/web/src/generated`
-  and `uv run ontology docs`. Never hand-edit generated TS or `docs/ontology.md`.
+- **YAML first.** Add/change object types, actions, links, functions, agents under
+  `ontology/domains/<name>/`, then regenerate: `uv run ontology export-web` and
+  `uv run ontology --domain <name> docs`. Never hand-edit generated TS or docs.
+- **Domain isolation.** All CLI commands take `--domain` (default: `ONTOLOGY_DOMAIN`,
+  else `liquor`). A domain instance serves exactly one domain; there is no `domain`
+  column and no qualified apiName. Runtime namespaces come from `domain.yaml`, never
+  from a global setting.
+- **Platform types are off-limits.** `ActionProposal`, `AgentRun`, and the proposal
+  actions live in `ontology/platform/`; the loader rejects a domain that redefines them.
 - YAML/JSON keys are camelCase (`apiName`, `displayName`, `fromObjectType`); Python
   modules/functions are snake_case; classes PascalCase; test files `test_*.py`.
 - **One write path.** Every action (declarative or function-backed) builds an

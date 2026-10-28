@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: orderStop
+  displayName: 납품정류장
+  fromObjectType: SalesOrder
+  fromApiName: stop
+  fromCardinality: one
+  toObjectType: DeliveryStop
+  toApiName: orders
+  toCardinality: many

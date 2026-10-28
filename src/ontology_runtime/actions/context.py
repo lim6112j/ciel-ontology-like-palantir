@@ -126,7 +126,7 @@ class EditContext:
     def create(self, object_type: str, properties: dict[str, Any], rid: str | None = None) -> str:
         from ontology_runtime.store.object_store import ObjectStore, new_rid
 
-        created_rid = rid or new_rid(object_type)
+        created_rid = rid or new_rid(object_type, self.registry.namespace)
         if created_rid in self.created:
             raise ValueError(f"object {created_rid!r} already exists in this transaction")
         coerced, report = ObjectStore(self.registry, self.session).validate_properties(

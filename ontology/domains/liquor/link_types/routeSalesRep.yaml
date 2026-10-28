@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: routeSalesRep
+  displayName: 담당영업사원
+  fromObjectType: DeliveryRoute
+  fromApiName: salesRep
+  fromCardinality: one
+  toObjectType: SalesRep
+  toApiName: routes
+  toCardinality: many

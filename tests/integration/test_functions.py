@@ -7,15 +7,17 @@ import datetime as dt
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ontology_runtime.config import SCHEMA_DIR
-from ontology_runtime.functions.write.delivery import haversine_km, nearest_neighbour_route
+from ontology_runtime.domains.liquor.functions.write.delivery import (
+    haversine_km,
+    nearest_neighbour_route,
+)
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.runtime import Runtime
 
 
 @pytest.fixture
 def runtime(session: AsyncSession) -> Runtime:
-    return Runtime(SchemaRegistry.from_directory(SCHEMA_DIR), session)
+    return Runtime(SchemaRegistry.from_domain("liquor"), session)
 
 
 async def _seed_master(runtime: Runtime) -> dict[str, str]:

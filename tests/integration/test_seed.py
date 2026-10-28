@@ -8,18 +8,17 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ontology_runtime.config import SCHEMA_DIR
 from ontology_runtime.db.models import ActionEditRow, ActionRunRow, AgentRunRow, LinkRow, ObjectRow
+from ontology_runtime.domains.liquor.seed.generator import SeedGenerator
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.runtime import Runtime
-from ontology_runtime.seed.generator import SeedGenerator
 
 TODAY = dt.date(2026, 10, 25)
 
 
 @pytest.fixture
 def registry() -> SchemaRegistry:
-    return SchemaRegistry.from_directory(SCHEMA_DIR)
+    return SchemaRegistry.from_domain("liquor")
 
 
 @pytest.fixture

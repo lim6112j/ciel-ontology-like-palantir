@@ -67,4 +67,6 @@ async def test_model_can_call_a_tool(provider: OpenRouterProvider) -> None:
     assert result.tool_calls or result.content
     if result.tool_calls:
         assert result.tool_calls[0].name == "lookup_outlet"
-        assert "행복식당" in result.tool_calls[0].arguments or "name" in result.tool_calls[0].arguments
+        assert (
+            "행복식당" in result.tool_calls[0].arguments or "name" in result.tool_calls[0].arguments
+        )

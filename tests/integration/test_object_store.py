@@ -24,7 +24,7 @@ async def _outlet(store: ObjectStore, name: str = "행복식당", **props):
 
 async def test_create_and_get(store: ObjectStore) -> None:
     created = await _outlet(store)
-    assert created.rid.startswith("ri.liquor.object.outlet.")
+    assert created.rid.startswith("ri.phonebook.object.outlet.")
     assert created.version == 1
 
     fetched = await store.get(created.rid)
@@ -118,7 +118,7 @@ async def test_restore_returns_object(store: ObjectStore) -> None:
 async def test_get_many_preserves_request_order(store: ObjectStore) -> None:
     first = await _outlet(store, "A")
     second = await _outlet(store, "B")
-    found = await store.get_many([second.rid, first.rid, "ri.liquor.object.outlet.missing"])
+    found = await store.get_many([second.rid, first.rid, "ri.phonebook.object.outlet.missing"])
     assert [obj.rid for obj in found] == [second.rid, first.rid]
 
 

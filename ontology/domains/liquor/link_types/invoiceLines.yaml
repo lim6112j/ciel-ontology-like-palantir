@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: invoiceLines
+  displayName: 계산서라인
+  fromObjectType: SalesInvoice
+  fromApiName: lines
+  fromCardinality: many
+  toObjectType: InvoiceLine
+  toApiName: invoice
+  toCardinality: one

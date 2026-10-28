@@ -1,0 +1,13 @@
+functions:
+- apiName: computeOrderTotals
+  displayName: 발주 금액 계산
+  description: 라인 금액과 케이스 수를 합산한다. 세액은 과세 제품 합계의 10%다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.orders.compute_order_totals
+  parameters:
+    orderLines:
+      apiName: orderLines
+      type: objectSet
+      objectType: SalesOrderLine
+      required: true

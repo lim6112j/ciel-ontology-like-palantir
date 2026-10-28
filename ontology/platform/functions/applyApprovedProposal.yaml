@@ -1,0 +1,12 @@
+functions:
+  - apiName: applyApprovedProposal
+    displayName: 승인된 제안 실행
+    description: 승인된 ActionProposal의 대상 액션을 동일 적용기로 실행하고 상태를 전이한다.
+    kind: write
+    implementation: ontology_runtime.platform.functions.proposals.apply_approved_proposal
+    parameters:
+      proposal:
+        apiName: proposal
+        type: objectRef
+        objectType: ActionProposal
+        required: true

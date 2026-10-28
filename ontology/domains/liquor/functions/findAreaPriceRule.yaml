@@ -1,0 +1,18 @@
+functions:
+- apiName: findAreaPriceRule
+  displayName: 지역별 공급가 조회
+  description: 창고 권역과 거래처 업태에 맞는 공급가를 반환한다.
+  kind: read
+  agentCallable: false
+  implementation: ontology_runtime.domains.liquor.functions.read.orders.find_area_price_rule
+  parameters:
+    product:
+      apiName: product
+      type: objectRef
+      objectType: Product
+      required: true
+    outlet:
+      apiName: outlet
+      type: objectRef
+      objectType: Outlet
+      required: true
