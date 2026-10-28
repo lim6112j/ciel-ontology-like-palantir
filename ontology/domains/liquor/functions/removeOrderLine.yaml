@@ -1,0 +1,11 @@
+functions:
+- apiName: removeOrderLine
+  displayName: 발주라인 삭제
+  description: 초안 발주에서 라인을 제거하고 합계를 재계산한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.orders.remove_order_line
+  parameters:
+    line:
+      apiName: line
+      type: objectRef
+      objectType: SalesOrderLine

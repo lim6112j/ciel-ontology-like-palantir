@@ -92,7 +92,7 @@ async def test_missing_object_rejected(stores) -> None:
     objects, links = stores
     outlet = await _outlet(objects, "A")
     with pytest.raises(NotFoundError):
-        await links.create("orders", outlet.rid, "ri.liquor.object.order.missing")
+        await links.create("orders", outlet.rid, "ri.phonebook.object.order.missing")
 
 
 async def test_delete_link(stores, demo_registry: SchemaRegistry) -> None:

@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: outletOrders
+  displayName: 발주
+  fromObjectType: Outlet
+  fromApiName: orders
+  fromCardinality: many
+  toObjectType: SalesOrder
+  toApiName: outlet
+  toCardinality: one

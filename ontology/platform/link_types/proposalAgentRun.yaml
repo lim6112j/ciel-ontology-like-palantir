@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: proposalAgentRun
+    displayName: 실행기록
+    fromObjectType: ActionProposal
+    fromApiName: agentRun
+    fromCardinality: one
+    toObjectType: AgentRun
+    toApiName: proposals
+    toCardinality: many

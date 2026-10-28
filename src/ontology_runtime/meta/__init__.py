@@ -16,6 +16,7 @@ from ontology_runtime.meta.action_type import (
     ValidatorDef,
 )
 from ontology_runtime.meta.agent import AgentDef, AgentKind
+from ontology_runtime.meta.domain import DomainManifest, WebConfig
 from ontology_runtime.meta.function import FunctionDef, FunctionKind, FunctionResult
 from ontology_runtime.meta.link_type import Cardinality, LinkTypeDef
 from ontology_runtime.meta.object_type import (
@@ -37,6 +38,7 @@ __all__ = [
     "CreateObjectRule",
     "DeleteLinkRule",
     "DeleteObjectRule",
+    "DomainManifest",
     "FunctionDef",
     "FunctionKind",
     "FunctionResult",
@@ -55,4 +57,5 @@ __all__ = [
     "StateMachineDef",
     "TransitionDef",
     "ValidatorDef",
+    "WebConfig",
 ]

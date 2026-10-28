@@ -1,0 +1,18 @@
+functions:
+- apiName: addOrderLine
+  displayName: 발주라인 추가
+  description: 초안 발주에 라인을 추가하고 합계를 재계산한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.orders.add_order_line
+  parameters:
+    order:
+      apiName: order
+      type: objectRef
+      objectType: SalesOrder
+    product:
+      apiName: product
+      type: objectRef
+      objectType: Product
+    cases:
+      apiName: cases
+      type: integer

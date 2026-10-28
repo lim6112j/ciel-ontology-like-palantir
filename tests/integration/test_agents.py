@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ontology_runtime.agents.loop import AgentLoop
 from ontology_runtime.agents.tools import build_tool_surface
-from ontology_runtime.config import SCHEMA_DIR
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.runtime import Runtime
 from tests.fixtures.llm.fake_provider import FakeProvider, response
@@ -17,7 +16,7 @@ TOOL_NAMES_THAT_WRITE = {"apply", "apply_action", "execute_action", "run_action"
 
 @pytest.fixture
 def runtime(session: AsyncSession) -> Runtime:
-    return Runtime(SchemaRegistry.from_directory(SCHEMA_DIR), session)
+    return Runtime(SchemaRegistry.from_domain("liquor"), session)
 
 
 async def _seed(runtime: Runtime) -> dict[str, str]:

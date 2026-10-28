@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: salesRepDepot
+  displayName: 소속창고
+  fromObjectType: SalesRep
+  fromApiName: depot
+  fromCardinality: one
+  toObjectType: Depot
+  toApiName: salesReps
+  toCardinality: many

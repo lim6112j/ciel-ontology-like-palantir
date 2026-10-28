@@ -1,0 +1,11 @@
+functions:
+- apiName: completeDelivery
+  displayName: 배송 완료
+  description: 정류장 결과에 따라 완료 또는 부분 완료로 전이한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery_ops.complete_delivery
+  parameters:
+    delivery:
+      apiName: delivery
+      type: objectRef
+      objectType: Delivery

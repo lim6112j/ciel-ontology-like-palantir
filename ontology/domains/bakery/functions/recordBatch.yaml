@@ -1,0 +1,25 @@
+functions:
+  - apiName: recordBatch
+    displayName: 생산배치 등록
+    description: 배치번호를 채번하고 소비기한을 유통기한으로부터 계산한다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.batches.record_batch
+    parameters:
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: true
+      store:
+        apiName: store
+        type: objectRef
+        objectType: Store
+        required: false
+      quantity:
+        apiName: quantity
+        type: integer
+        required: true
+      producedOn:
+        apiName: producedOn
+        type: date
+        required: true

@@ -14,13 +14,12 @@ from ontology_runtime.clientgen.generator import (
     render_ontology_markdown,
     write_client,
 )
-from ontology_runtime.config import SCHEMA_DIR
 from ontology_runtime.registry import SchemaRegistry
 
 
 @pytest.fixture(scope="module")
 def registry() -> SchemaRegistry:
-    return SchemaRegistry.from_directory(SCHEMA_DIR)
+    return SchemaRegistry.from_domain("liquor")
 
 
 def test_types_include_every_object_type(registry: SchemaRegistry) -> None:
@@ -50,7 +49,7 @@ def test_links_import_object_type_name(registry: SchemaRegistry) -> None:
 
 
 def test_client_exposes_guardrailed_surface() -> None:
-    registry = SchemaRegistry.from_directory(SCHEMA_DIR)
+    registry = SchemaRegistry.from_domain("liquor")
     output = generate_client(registry)
     assert "validate:" in output and "apply:" in output
     assert "invokeAgent:" in output

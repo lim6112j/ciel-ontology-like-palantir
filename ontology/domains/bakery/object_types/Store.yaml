@@ -1,0 +1,40 @@
+apiName: Store
+displayName: 매장
+pluralDisplayName: 매장
+description: 베이커리 제품을 판매하는 매장.
+primaryKey: storeNo
+properties:
+  storeNo:
+    apiName: storeNo
+    displayName: 매장번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 매장명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [active, closed]
+    required: true
+    indexed: true
+    defaultValue: active
+  openedOn:
+    apiName: openedOn
+    displayName: 개점일
+    type: date
+stateMachine:
+  property: status
+  initial: active
+  transitions:
+    - from: active
+      to: closed
+    - from: closed
+      to: active

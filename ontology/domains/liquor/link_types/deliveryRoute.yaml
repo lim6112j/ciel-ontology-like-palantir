@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: deliveryRoute
+  displayName: 배송노선
+  fromObjectType: Delivery
+  fromApiName: route
+  fromCardinality: one
+  toObjectType: DeliveryRoute
+  toApiName: deliveries
+  toCardinality: many

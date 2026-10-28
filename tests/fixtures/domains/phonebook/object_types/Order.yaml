@@ -1,0 +1,23 @@
+apiName: Order
+displayName: 발주
+primaryKey: orderNo
+properties:
+  orderNo:
+    apiName: orderNo
+    type: string
+    required: true
+  outletRid:
+    apiName: outletRid
+    type: objectRef
+    objectType: Outlet
+  totalAmount:
+    apiName: totalAmount
+    type: integer
+    indexed: true
+  status:
+    apiName: status
+    type: enum
+    values: [draft, submitted]
+    required: true
+    indexed: true
+    defaultValue: draft

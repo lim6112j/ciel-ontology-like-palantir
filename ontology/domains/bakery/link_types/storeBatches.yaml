@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: storeBatches
+    displayName: 배치
+    fromObjectType: Store
+    fromApiName: batches
+    fromCardinality: many
+    toObjectType: Batch
+    toApiName: store
+    toCardinality: one

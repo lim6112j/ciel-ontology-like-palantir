@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: driverShifts
+  displayName: 근무
+  fromObjectType: Driver
+  fromApiName: shifts
+  fromCardinality: many
+  toObjectType: DriverShift
+  toApiName: driver
+  toCardinality: one

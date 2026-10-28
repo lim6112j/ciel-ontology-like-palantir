@@ -1,44 +1,64 @@
 import { NavLink, Outlet } from 'react-router-dom';
 
-const NAV = [
-  { section: '에이전트' },
-  { to: '/inbox', label: '제안 인박스' },
-  { to: '/assistant', label: '운영 어시스턴트' },
-  { section: '영업' },
-  { to: '/outlets', label: '거래처' },
-  { to: '/orders', label: '발주' },
-  { to: '/orders/new', label: '발주 접수' },
-  { section: '물류' },
-  { to: '/deliveries', label: '배송 보드' },
-  { section: '온톨로지' },
-  { to: '/ontology', label: '스키마 브라우저' },
+import { DOMAIN_BY_NAME } from '../generated/domains';
+import type { NavItem } from '../domains';
+
+interface Props {
+  domain: string;
+  extraNav: NavItem[];
+}
+
+/** Generic console sections every domain gets, plus whatever the domain adds. */
+const BASE_NAV: { section: string; items: NavItem[] }[] = [
+  {
+    section: '에이전트',
+    items: [
+      { to: 'inbox', label: '제안 인박스' },
+      { to: 'assistant', label: '운영 어시스턴트' },
+    ],
+  },
+  {
+    section: '온톨로지',
+    items: [
+      { to: 'objects', label: '객체 탐색기' },
+      { to: 'schema', label: '스키마 브라우저' },
+    ],
+  },
 ];
 
-export function AppShell() {
+export function AppShell({ domain, extraNav }: Props) {
+  const entry = DOMAIN_BY_NAME[domain];
+  const sections = extraNav.length > 0
+    ? [
+        ...BASE_NAV.slice(0, 1),
+        { section: entry?.displayName ?? domain, items: extraNav },
+        ...BASE_NAV.slice(1),
+      ]
+    : BASE_NAV;
+
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          주류 도매 온톨로지
-          <span>Ciel runtime</span>
-        </div>
+        <NavLink to="/" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>
+          {entry?.displayName ?? domain}
+          <span>← 도메인 목록</span>
+        </NavLink>
         <nav className="nav">
-          {NAV.map((item, index) =>
-            'section' in item ? (
-              <div className="section" key={`s-${index}`}>
-                {item.section}
-              </div>
-            ) : (
-              <NavLink
-                key={item.to}
-                to={item.to!}
-                className={({ isActive }) => (isActive ? 'active' : undefined)}
-                end
-              >
-                {item.label}
-              </NavLink>
-            ),
-          )}
+          {sections.map((section) => (
+            <div key={section.section}>
+              <div className="section">{section.section}</div>
+              {section.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={`/${domain}/${item.to}`}
+                  className={({ isActive }) => (isActive ? 'active' : undefined)}
+                  end
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          ))}
         </nav>
       </aside>
       <main className="main">

@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: deliveryVehicle
+  displayName: 차량
+  fromObjectType: Delivery
+  fromApiName: vehicle
+  fromCardinality: one
+  toObjectType: Vehicle
+  toApiName: deliveries
+  toCardinality: many

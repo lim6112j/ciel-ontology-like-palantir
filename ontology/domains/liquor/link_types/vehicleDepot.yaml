@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: vehicleDepot
+  displayName: 소속창고
+  fromObjectType: Vehicle
+  fromApiName: depot
+  fromCardinality: one
+  toObjectType: Depot
+  toApiName: vehicles
+  toCardinality: many

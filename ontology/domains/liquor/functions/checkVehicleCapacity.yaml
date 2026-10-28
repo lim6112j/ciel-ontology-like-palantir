@@ -1,0 +1,18 @@
+functions:
+- apiName: checkVehicleCapacity
+  displayName: 차량 적재 검증
+  description: 후보 정류장 집합의 케이스·중량이 차량 한도를 넘지 않는지 확인한다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.delivery.check_vehicle_capacity
+  parameters:
+    vehicle:
+      apiName: vehicle
+      type: objectRef
+      objectType: Vehicle
+      required: true
+    stops:
+      apiName: stops
+      type: objectSet
+      objectType: DeliveryStop
+      required: true

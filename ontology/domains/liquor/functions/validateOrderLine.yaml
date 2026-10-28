@@ -1,0 +1,17 @@
+functions:
+- apiName: validateOrderLine
+  displayName: 발주라인 검증
+  description: 제품 판매 여부와 최소 주문 수량을 확인한다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.orders.validate_order_line
+  parameters:
+    product:
+      apiName: product
+      type: objectRef
+      objectType: Product
+      required: true
+    cases:
+      apiName: cases
+      type: integer
+      required: true

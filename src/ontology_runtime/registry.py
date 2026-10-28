@@ -21,6 +21,7 @@ from ontology_runtime.meta import (
     ActionTypeDef,
     AgentDef,
     Cardinality,
+    DomainManifest,
     FunctionDef,
     LinkTypeDef,
     ObjectTypeDef,
@@ -40,6 +41,9 @@ class ResolvedIndex:
     expressions: tuple[str, ...]
     unique: bool
     where: str | None
+    #: Domain RID namespace; index names are prefixed with it so two domains
+    #: with a same-named type never collide on the global `ontology_indexes` PK.
+    namespace: str = "ont"
 
     def ddl(self) -> str:
         unique = "UNIQUE " if self.unique else ""
@@ -76,8 +80,44 @@ class SchemaRegistry:
         self._build_link_views()
 
     @classmethod
-    def from_directory(cls, schema_dir: Path) -> SchemaRegistry:
-        return cls(load_schema(schema_dir))
+    def from_directory(
+        cls, schema_dir: Path, *, platform_dir: Path | None = None
+    ) -> SchemaRegistry:
+        return cls(load_schema(schema_dir, platform_dir=platform_dir))
+
+    @classmethod
+    def from_domain(
+        cls,
+        name: str,
+        *,
+        domains_dir: Path | None = None,
+        platform_dir: Path | None = None,
+    ) -> SchemaRegistry:
+        """Load one domain with the shared platform definitions merged in."""
+        from ontology_runtime.config import DOMAINS_DIR, PLATFORM_DIR
+
+        base = domains_dir or DOMAINS_DIR
+        directory = base / name
+        if not (directory / "domain.yaml").exists():
+            available = sorted(p.name for p in base.iterdir() if (p / "domain.yaml").exists())
+            raise SchemaError(
+                f"unknown domain {name!r}; available: {', '.join(available) or '(none)'}"
+            )
+        return cls.from_directory(directory, platform_dir=platform_dir or PLATFORM_DIR)
+
+    @property
+    def domain(self) -> DomainManifest | None:
+        return self.bundle.domain
+
+    @property
+    def domain_name(self) -> str:
+        return self.bundle.domain_name
+
+    @property
+    def namespace(self) -> str:
+        """RID namespace and index prefix. Bare schemas keep the original `ont`."""
+        domain = self.bundle.domain
+        return domain.namespace if domain else "ont"
 
     # -- lookups -----------------------------------------------------------
     def object_type(self, api_name: str) -> ObjectTypeDef:
@@ -161,14 +201,16 @@ class SchemaRegistry:
     # -- indexes -----------------------------------------------------------
     def indexes(self) -> list[ResolvedIndex]:
         specs: list[ResolvedIndex] = []
+        namespace = self.namespace
         for obj in self.bundle.object_types.values():
             declared: set[tuple[str, ...]] = set()
             for name in obj.indexed_properties():
                 declared.add((name,))
                 specs.append(
                     ResolvedIndex(
-                        name=_index_name(obj.apiName, (name,)),
+                        name=_index_name(namespace, obj.apiName, (name,)),
                         object_type=obj.apiName,
+                        namespace=namespace,
                         expressions=(_expression(obj, name),),
                         unique=obj.properties[name].unique,
                         where=None,
@@ -187,6 +229,7 @@ class SchemaRegistry:
                     ResolvedIndex(
                         name=index.name,
                         object_type=obj.apiName,
+                        namespace=namespace,
                         expressions=tuple(_expression(obj, p) for p in index.properties),
                         unique=index.unique,
                         where=index.where,
@@ -207,6 +250,6 @@ def _expression(obj: ObjectTypeDef, property_name: str) -> str:
     return f"((properties->>'{property_name}')::{cast})"
 
 
-def _index_name(object_type: str, properties: tuple[str, ...]) -> str:
+def _index_name(namespace: str, object_type: str, properties: tuple[str, ...]) -> str:
     joined = "_".join(properties)
-    return f"ix_ont_{object_type.lower()}_{joined.lower()}"
+    return f"ix_{namespace.lower()}_{object_type.lower()}_{joined.lower()}"

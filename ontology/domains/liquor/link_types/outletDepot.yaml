@@ -1,0 +1,9 @@
+linkTypes:
+- apiName: outletDepot
+  displayName: 담당창고
+  fromObjectType: Outlet
+  fromApiName: depot
+  fromCardinality: one
+  toObjectType: Depot
+  toApiName: outlets
+  toCardinality: many

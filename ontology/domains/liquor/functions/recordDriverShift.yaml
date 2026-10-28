@@ -1,0 +1,16 @@
+functions:
+- apiName: recordDriverShift
+  displayName: 기사 근무 기록
+  description: 배송 시작 시 당일 근무를 working으로 생성한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery_shift.record_driver_shift
+  parameters:
+    driver:
+      apiName: driver
+      type: objectRef
+      objectType: Driver
+      required: true
+    shiftDate:
+      apiName: shiftDate
+      type: date
+      required: true

@@ -1,0 +1,13 @@
+functions:
+- apiName: scoreOutletCredit
+  displayName: 거래처 신용위험 점수
+  description: 최근 주문 패턴과 실패 정류장 비율로 위험 점수를 계산한다.
+  kind: read
+  agentCallable: true
+  implementation: ontology_runtime.domains.liquor.functions.read.analytics.score_outlet_credit
+  parameters:
+    outlet:
+      apiName: outlet
+      type: objectRef
+      objectType: Outlet
+      required: true

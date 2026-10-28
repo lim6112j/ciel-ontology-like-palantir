@@ -1,0 +1,11 @@
+apiName: bakery
+displayName: 베이커리 유통
+description: 베이커리 생산·매장·배치 재고 온톨로지. 주류 도메인과 완전히 독립적이다.
+ridNamespace: bakery
+pythonPackage: ontology_runtime.domains.bakery
+web:
+  enabled: true
+  order: 20
+  tagline: 베이커리 생산·매장·배치 재고 콘솔
+  apiBase: /api/bakery
+  backendUrl: http://localhost:8001

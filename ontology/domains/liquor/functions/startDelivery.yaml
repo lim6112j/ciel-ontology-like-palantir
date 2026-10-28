@@ -1,0 +1,11 @@
+functions:
+- apiName: startDelivery
+  displayName: 배송 시작
+  description: 배송을 진행중으로 바꾸고 기사 근무를 기록한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery_ops.start_delivery
+  parameters:
+    delivery:
+      apiName: delivery
+      type: objectRef
+      objectType: Delivery

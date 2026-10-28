@@ -1,4 +1,4 @@
-import type { Violation } from '../generated';
+import type { Violation } from '../console/api';
 
 export function ViolationBanner({ violations }: { violations: Violation[] }) {
   if (!violations.length) return null;

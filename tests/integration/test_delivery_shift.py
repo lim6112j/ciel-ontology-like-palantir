@@ -8,15 +8,14 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ontology_runtime.actions.context import EditContext
-from ontology_runtime.config import SCHEMA_DIR
-from ontology_runtime.functions.write.delivery_shift import record_driver_shift
+from ontology_runtime.domains.liquor.functions.write.delivery_shift import record_driver_shift
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.runtime import Runtime
 
 
 @pytest.fixture
 def runtime(session: AsyncSession) -> Runtime:
-    return Runtime(SchemaRegistry.from_directory(SCHEMA_DIR), session)
+    return Runtime(SchemaRegistry.from_domain("liquor"), session)
 
 
 async def _driver(runtime: Runtime) -> str:

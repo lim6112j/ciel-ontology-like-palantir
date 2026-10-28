@@ -28,7 +28,7 @@ TS_TYPE: dict[PropertyType, str] = {
 }
 
 HEADER = """// GENERATED FILE — do not edit by hand.
-// Regenerate with: uv run ontology export-client --out apps/web/src/generated
+// Regenerate with: uv run ontology export-web
 """
 
 
@@ -162,9 +162,10 @@ def generate_agents(registry: SchemaRegistry) -> str:
 
 
 def generate_client(registry: SchemaRegistry) -> str:
-    return (
-        HEADER
-        + """
+    api_base = registry.domain.web_api_base if registry.domain else "/api"
+    env_key = f"VITE_API_BASE_{registry.domain_name.upper()}"
+    return HEADER + (
+        """
 export interface ObjectReference {
   objectType: string;
   rid: string;
@@ -200,7 +201,7 @@ export interface Violation {
   severity: string;
 }
 
-const BASE = import.meta.env?.VITE_API_BASE ?? '/api';
+const BASE = import.meta.env?.{envKey} ?? '{apiBase}';
 
 async function request<T>(
   path: string,
@@ -220,7 +221,7 @@ async function request<T>(
 }
 
 export const api = {
-  health: () => request<{ status: string; objectTypes: number }>('/../health'),
+  health: () => request<{ status: string; domain: string; objectTypes: number }>('/health'),
 
   objectTypes: () => request<unknown[]>('/ontology/objectTypes'),
   objectType: (apiName: string) => request<unknown>(`/ontology/objectTypes/${apiName}`),
@@ -283,7 +284,7 @@ export const api = {
 
 export const VERSION = 'generated-{timestamp}';
 """.replace("{timestamp}", dt.datetime.now(dt.UTC).strftime("%Y%m%d"))
-    )
+    ).replace("{apiBase}", api_base).replace("{envKey}", env_key)
 
 
 def write_client(registry: SchemaRegistry, out_dir: Path) -> list[Path]:

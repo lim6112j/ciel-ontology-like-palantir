@@ -1,0 +1,46 @@
+apiName: Product
+displayName: 제품
+pluralDisplayName: 제품
+description: 베이커리 SKU. 주류 도메인의 Product와 이름은 같지만 속성은 완전히 다르다.
+primaryKey: sku
+properties:
+  sku:
+    apiName: sku
+    displayName: SKU
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 제품명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  category:
+    apiName: category
+    displayName: 분류
+    type: enum
+    values: [식빵, 단과자, 케이크, 페이스트리, 기타]
+    required: true
+    indexed: true
+  shelfLifeDays:
+    apiName: shelfLifeDays
+    displayName: 유통기한(일)
+    type: integer
+    required: true
+    min: 1
+  unitPrice:
+    apiName: unitPrice
+    displayName: 단가(원)
+    type: integer
+    required: true
+    min: 0
+  active:
+    apiName: active
+    displayName: 판매중
+    type: boolean
+    required: true
+    indexed: true
+    defaultValue: true

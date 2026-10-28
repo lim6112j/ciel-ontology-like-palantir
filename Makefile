@@ -1,4 +1,6 @@
-.PHONY: db-up db-down migrate seed web test lint
+DOMAIN ?= liquor
+
+.PHONY: db-up db-down migrate seed web test lint domains gen-web
 
 db-up:
 	docker compose up -d db
@@ -9,8 +11,15 @@ db-down:
 migrate:
 	uv run alembic upgrade head
 
+domains:
+	uv run ontology domains
+
 seed:
-	uv run ontology seed --seed 42
+	uv run ontology --domain $(DOMAIN) seed --seed 42
+
+gen-web:
+	uv run ontology export-web
+	uv run ontology --domain $(DOMAIN) docs
 
 web:
 	cd apps/web && pnpm dev

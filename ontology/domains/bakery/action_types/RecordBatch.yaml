@@ -1,0 +1,29 @@
+apiName: RecordBatch
+displayName: 생산배치 등록
+description: 제품과 수량을 받아 생산배치를 만들고 제품·매장에 연결한다.
+agentProposable: true
+allowedRoles: [manager, baker, agent]
+parameters:
+  product:
+    apiName: product
+    type: objectRef
+    objectType: Product
+    displayName: 제품
+  store:
+    apiName: store
+    type: objectRef
+    objectType: Store
+    displayName: 매장
+    required: false
+  quantity:
+    apiName: quantity
+    type: integer
+    displayName: 수량
+    required: true
+  producedOn:
+    apiName: producedOn
+    type: date
+    displayName: 생산일
+rules:
+  - type: runFunction
+    function: recordBatch

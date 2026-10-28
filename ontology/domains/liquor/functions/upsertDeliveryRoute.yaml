@@ -1,0 +1,25 @@
+functions:
+- apiName: upsertDeliveryRoute
+  displayName: 배송노선 등록/수정
+  description: 요일별 상시 노선을 만들거나 갱신한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.master_data.upsert_delivery_route
+  parameters:
+    routeCode:
+      apiName: routeCode
+      type: string
+    name:
+      apiName: name
+      type: string
+    weekday:
+      apiName: weekday
+      type: integer
+    depot:
+      apiName: depot
+      type: objectRef
+      objectType: Depot
+    salesRep:
+      apiName: salesRep
+      type: objectRef
+      objectType: SalesRep
+      required: false

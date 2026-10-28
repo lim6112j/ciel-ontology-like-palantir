@@ -326,4 +326,4 @@ async def test_declarative_create_generates_rid(
     )
     created = result.data["created"]["Order"]
     assert len(created) == 1
-    assert created[0].startswith("ri.liquor.object.order.")
+    assert created[0].startswith("ri.ont.object.order.")

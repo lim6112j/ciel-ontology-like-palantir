@@ -1,0 +1,17 @@
+functions:
+- apiName: completeStop
+  displayName: 납품 완료 처리
+  description: 정류장을 완료하고 판매계산서·계산서 라인을 생성해 발주 상태를 갱신한다.
+  kind: write
+  implementation: ontology_runtime.domains.liquor.functions.write.delivery.complete_stop
+  parameters:
+    stop:
+      apiName: stop
+      type: objectRef
+      objectType: DeliveryStop
+      required: true
+    actualCases:
+      apiName: actualCases
+      type: integer
+      required: true
+      description: 0이면 전량 미납으로 기록한다.

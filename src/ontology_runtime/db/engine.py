@@ -1,4 +1,4 @@
-"""Async database engine and session helpers."""
+"""Async database engine and session helpers, one engine per domain."""
 
 from __future__ import annotations
 
@@ -14,28 +14,38 @@ from sqlalchemy.ext.asyncio import (
 
 from ontology_runtime.config import settings
 
-_engine: AsyncEngine | None = None
-_session_factory: async_sessionmaker[AsyncSession] | None = None
+_engines: dict[str, AsyncEngine] = {}
+_session_factories: dict[str, async_sessionmaker[AsyncSession]] = {}
 
 
-def get_engine() -> AsyncEngine:
-    global _engine
-    if _engine is None:
-        _engine = create_async_engine(settings.database_url, pool_pre_ping=True)
-    return _engine
+def _domain(domain: str | None) -> str:
+    return domain or settings.domain
 
 
-def get_session_factory() -> async_sessionmaker[AsyncSession]:
-    global _session_factory
-    if _session_factory is None:
-        _session_factory = async_sessionmaker(get_engine(), expire_on_commit=False)
-    return _session_factory
+def get_engine(domain: str | None = None) -> AsyncEngine:
+    name = _domain(domain)
+    engine = _engines.get(name)
+    if engine is None:
+        # Per-domain override (`DATABASE_URL_<DOMAIN>`) keeps two domain
+        # instances from sharing one database by accident.
+        engine = create_async_engine(settings.database_url_for(name), pool_pre_ping=True)
+        _engines[name] = engine
+    return engine
+
+
+def get_session_factory(domain: str | None = None) -> async_sessionmaker[AsyncSession]:
+    name = _domain(domain)
+    factory = _session_factories.get(name)
+    if factory is None:
+        factory = async_sessionmaker(get_engine(name), expire_on_commit=False)
+        _session_factories[name] = factory
+    return factory
 
 
 @asynccontextmanager
-async def session_scope() -> AsyncIterator[AsyncSession]:
+async def session_scope(domain: str | None = None) -> AsyncIterator[AsyncSession]:
     """Yield a session, committing on success and rolling back on error."""
-    async with get_session_factory()() as session:
+    async with get_session_factory(domain)() as session:
         try:
             yield session
             await session.commit()
@@ -44,9 +54,15 @@ async def session_scope() -> AsyncIterator[AsyncSession]:
             raise
 
 
-async def dispose_engine() -> None:
-    global _engine, _session_factory
-    if _engine is not None:
-        await _engine.dispose()
-    _engine = None
-    _session_factory = None
+async def dispose_engine(domain: str | None = None) -> None:
+    if domain is None:
+        for active in _engines.values():
+            await active.dispose()
+        _engines.clear()
+        _session_factories.clear()
+        return
+    name = _domain(domain)
+    retired: AsyncEngine | None = _engines.pop(name, None)
+    _session_factories.pop(name, None)
+    if retired is not None:
+        await retired.dispose()
