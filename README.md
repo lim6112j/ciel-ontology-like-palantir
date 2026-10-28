@@ -29,19 +29,80 @@ uv run uvicorn ontology_runtime.api.app:app --reload      # http://localhost:800
 cd apps/web && pnpm install && pnpm dev                    # http://localhost:5173
 ```
 
-`--domain`은 서브커맨드 앞뒤 어디에나 올 수 있고, 생략하면 `ONTOLOGY_DOMAIN`(기본 `liquor`)을
-씁니다. 두 도메인을 동시에 띄울 때는 서로 다른 포트와 DB를 지정합니다.
-
-```bash
-ONTOLOGY_DOMAIN=bakery DATABASE_URL_BAKERY=postgresql+asyncpg://ontology:ontology@localhost:55432/ontology_bakery \
-  uv run uvicorn ontology_runtime.api.app:app --port 8001
-```
-
 에이전트를 실제로 실행하려면 `OPENROUTER_API_KEY`가 필요합니다. 기본 테스트는 이 키 없이도
 돌고, 실제 호출 테스트만 `-m live`로 분리되어 있습니다.
 
-`uv run ontology --domain liquor demo`는 발주→배차→납품 시퀀스를 한 번에 재생하며,
-`uv run ontology --domain liquor docs`는 스키마에서 `docs/domains/liquor/ontology.md`를 생성합니다.
+## 실행 방법
+
+한 인스턴스는 한 도메인만 서빙합니다. 도메인마다 **포트와 DB를 따로** 지정하고,
+DB 접속 문자열은 `DATABASE_URL_<도메인 대문자>`(`DATABASE_URL_LIQUOR`, `DATABASE_URL_BAKERY`)로
+덮어쓸 수 있습니다. 설정하지 않으면 `DATABASE_URL`(기본 `.../ontology`)을 공유합니다.
+
+### liquor (기본)
+
+```bash
+docker compose up -d db                     # PostgreSQL 16, 포트 55432
+uv sync
+uv run alembic upgrade head                 # 공통 스키마 (도메인별 테이블 없음)
+uv run ontology --domain liquor sync-indexes
+uv run ontology --domain liquor seed --seed 42
+uv run uvicorn ontology_runtime.api.app:app --reload   # http://localhost:8000
+cd apps/web && pnpm install && pnpm dev                # http://localhost:5173
+```
+
+- 전체 시연: `uv run ontology --domain liquor demo` (발주→배차→납품 재생)
+- 스키마 문서 재생성: `uv run ontology --domain liquor docs`
+- API 예시는 아래 [API 예시](#api-예시) 참고
+
+### bakery
+
+bakery는 liquor와 같은 PostgreSQL 인스턴스 안의 **다른 데이터베이스**를 쓰고,
+웹은 `/api/bakery` 프록시로 `localhost:8001` 백엔드에 붙습니다.
+
+```bash
+# 1) bakery 전용 DB 생성 (최초 1회)
+docker exec -it ontology-db createdb -U ontology ontology_bakery
+
+# 2) 마이그레이션 + 인덱스 + 시드
+#    주의: alembic은 DATABASE_URL을 그대로 읽으므로 여기만 DATABASE_URL=을 쓴다.
+#    (schema가 도메인별 테이블을 두지 않아 마이그레이션은 모든 도메인 DB에서 동일하다.)
+export BAKERY_DB=postgresql+asyncpg://ontology:ontology@localhost:55432/ontology_bakery
+DATABASE_URL=$BAKERY_DB uv run alembic upgrade head
+DATABASE_URL_BAKERY=$BAKERY_DB uv run ontology --domain bakery sync-indexes
+DATABASE_URL_BAKERY=$BAKERY_DB uv run ontology --domain bakery seed --seed 42
+
+# 3) API (포트 8001)
+ONTOLOGY_DOMAIN=bakery DATABASE_URL_BAKERY=$BAKERY_DB \
+  uv run uvicorn ontology_runtime.api.app:app --port 8001
+
+# 4) 웹 콘솔
+cd apps/web && pnpm dev          # 랜딩에서 베이커리 도메인 선택
+```
+
+- 전체 시연: `DATABASE_URL_BAKERY=$BAKERY_DB uv run ontology --domain bakery demo`
+  (생산계획 완료 → 배치 생성 → 현황 요약 트레이스)
+- 스키마 문서 재생성: `uv run ontology --domain bakery docs`
+- API 스모크:
+
+```bash
+curl -s localhost:8001/api/ontology/objectTypes | jq '.data[].apiName'
+# Product, Store, Batch, ProductionPlan, Shipment, StoreStock, WasteRecord, ...
+
+curl -s -X POST localhost:8001/api/agents/bakeryOpsAgent/invoke \
+  -H 'content-type: application/json' -H 'X-Actor: manager01' \
+  -d '{"input":"오늘 생산 현황과 소비기한 임박 배치를 요약해줘"}' | jq
+```
+
+### 두 도메인 동시 실행
+
+| | liquor | bakery |
+|---|---|---|
+| 포트 | 8000 | 8001 |
+| DB | `ontology` | `ontology_bakery` |
+| DB 환경변수 | `DATABASE_URL_LIQUOR` (또는 기본 `DATABASE_URL`) | `DATABASE_URL_BAKERY` |
+
+두 인스턴스는 서로의 데이터를 절대 보지 못합니다(도메인 격리). 웹 콘솔은 랜딩 페이지에서
+도메인을 고르고, 각 도메인의 `apiBase`(`/api`, `/api/bakery`)로 알아서 라우팅됩니다.
 
 ## 구조
 
