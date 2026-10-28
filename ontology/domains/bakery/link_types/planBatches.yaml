@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: planBatches
+    displayName: 생산배치
+    fromObjectType: ProductionPlan
+    fromApiName: batches
+    fromCardinality: many
+    toObjectType: Batch
+    toApiName: plan
+    toCardinality: one

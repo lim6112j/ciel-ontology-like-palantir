@@ -1,0 +1,31 @@
+apiName: CreateProductionPlan
+displayName: 생산계획 생성
+description: 제품과 수량으로 생산계획을 만든다. 판매 중지 제품은 계획할 수 없다.
+agentProposable: true
+allowedRoles: [manager, baker, agent]
+parameters:
+  product:
+    apiName: product
+    type: objectRef
+    objectType: Product
+    displayName: 제품
+  planDate:
+    apiName: planDate
+    type: date
+    displayName: 계획일
+  plannedQty:
+    apiName: plannedQty
+    type: integer
+    displayName: 계획수량
+  note:
+    apiName: note
+    type: text
+    displayName: 비고
+    required: false
+validators:
+  - field: plannedQty
+    rule: range
+    value: {min: 1, max: 100000}
+rules:
+  - type: runFunction
+    function: planProduction

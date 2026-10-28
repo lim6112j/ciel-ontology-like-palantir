@@ -1,0 +1,32 @@
+functions:
+  - apiName: upsertProduct
+    displayName: 제품 등록/수정
+    description: SKU로 제품을 찾아 있으면 수정, 없으면 생성한다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.production.upsert_product
+    parameters:
+      sku:
+        apiName: sku
+        type: string
+        required: true
+      name:
+        apiName: name
+        type: string
+        required: true
+      category:
+        apiName: category
+        type: enum
+        values: [식빵, 단과자, 케이크, 페이스트리, 기타]
+        required: true
+      shelfLifeDays:
+        apiName: shelfLifeDays
+        type: integer
+        required: true
+      unitPrice:
+        apiName: unitPrice
+        type: integer
+        required: true
+      active:
+        apiName: active
+        type: boolean
+        required: false

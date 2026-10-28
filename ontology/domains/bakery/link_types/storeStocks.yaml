@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: storeStocks
+    displayName: 재고
+    fromObjectType: Store
+    fromApiName: stocks
+    fromCardinality: many
+    toObjectType: StoreStock
+    toApiName: store
+    toCardinality: one

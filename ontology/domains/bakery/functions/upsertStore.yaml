@@ -1,0 +1,19 @@
+functions:
+  - apiName: upsertStore
+    displayName: 매장 등록/수정
+    description: 매장번호로 매장을 찾아 있으면 수정, 없으면 생성한다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.production.upsert_store
+    parameters:
+      storeNo:
+        apiName: storeNo
+        type: string
+        required: true
+      name:
+        apiName: name
+        type: string
+        required: true
+      openedOn:
+        apiName: openedOn
+        type: date
+        required: false

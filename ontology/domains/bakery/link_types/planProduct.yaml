@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: planProduct
+    displayName: 계획제품
+    fromObjectType: ProductionPlan
+    fromApiName: product
+    fromCardinality: many
+    toObjectType: Product
+    toApiName: plans
+    toCardinality: one

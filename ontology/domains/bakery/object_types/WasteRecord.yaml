@@ -1,0 +1,39 @@
+apiName: WasteRecord
+displayName: 폐기기록
+pluralDisplayName: 폐기기록
+description: 폐기된 배치와 사유. 배치 상태를 wasted로 바꾸는 유일한 근거가 된다.
+primaryKey: wasteNo
+properties:
+  wasteNo:
+    apiName: wasteNo
+    displayName: 폐기번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  wastedOn:
+    apiName: wastedOn
+    displayName: 폐기일
+    type: date
+    required: true
+    indexed: true
+  batchRid:
+    apiName: batchRid
+    displayName: 배치
+    type: objectRef
+    objectType: Batch
+    required: true
+    indexed: true
+  quantity:
+    apiName: quantity
+    displayName: 폐기수량
+    type: integer
+    required: true
+    min: 1
+  reason:
+    apiName: reason
+    displayName: 사유
+    type: enum
+    values: [quality, expiry, damage, other]
+    required: true
+    indexed: true

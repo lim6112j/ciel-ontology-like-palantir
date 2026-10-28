@@ -1,0 +1,25 @@
+functions:
+  - apiName: shipBatch
+    displayName: 배치 출하
+    description: 배치를 매장으로 출하하고 출하수량만큼 매장 재고를 올린다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.shipments.ship_batch
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      store:
+        apiName: store
+        type: objectRef
+        objectType: Store
+        required: true
+      quantity:
+        apiName: quantity
+        type: integer
+        required: false
+      shipDate:
+        apiName: shipDate
+        type: date
+        required: false

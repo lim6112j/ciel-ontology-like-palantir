@@ -1,0 +1,25 @@
+functions:
+  - apiName: wasteBatch
+    displayName: 배치 폐기
+    description: 폐기기록을 남기고 배치 상태를 wasted로 바꾼다. 부분 폐기는 잔량만 남긴다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.waste.waste_batch
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      reason:
+        apiName: reason
+        type: enum
+        values: [quality, expiry, damage, other]
+        required: true
+      quantity:
+        apiName: quantity
+        type: integer
+        required: false
+      wastedOn:
+        apiName: wastedOn
+        type: date
+        required: false

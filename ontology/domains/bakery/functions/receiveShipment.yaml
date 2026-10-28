@@ -1,0 +1,16 @@
+functions:
+  - apiName: receiveShipment
+    displayName: 출하 입고
+    description: 배송 중 출하를 입고 처리한다. 재고는 출하 시점에 이미 반영되었다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.shipments.receive_shipment
+    parameters:
+      shipment:
+        apiName: shipment
+        type: objectRef
+        objectType: Shipment
+        required: true
+      receivedOn:
+        apiName: receivedOn
+        type: date
+        required: false

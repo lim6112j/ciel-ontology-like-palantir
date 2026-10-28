@@ -1,0 +1,35 @@
+apiName: UpsertProduct
+displayName: 제품 등록/수정
+description: SKU로 제품을 신규 등록하거나 기존 제품 정보를 갱신한다.
+agentProposable: false
+allowedRoles: [manager]
+parameters:
+  sku:
+    apiName: sku
+    type: string
+    displayName: SKU
+  name:
+    apiName: name
+    type: string
+    displayName: 제품명
+  category:
+    apiName: category
+    type: enum
+    values: [식빵, 단과자, 케이크, 페이스트리, 기타]
+    displayName: 분류
+  shelfLifeDays:
+    apiName: shelfLifeDays
+    type: integer
+    displayName: 유통기한(일)
+  unitPrice:
+    apiName: unitPrice
+    type: integer
+    displayName: 단가(원)
+  active:
+    apiName: active
+    type: boolean
+    displayName: 판매중
+    required: false
+rules:
+  - type: runFunction
+    function: upsertProduct

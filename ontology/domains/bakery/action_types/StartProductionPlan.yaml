@@ -1,0 +1,18 @@
+apiName: StartProductionPlan
+displayName: 생산 시작
+description: 계획된 생산계획을 진행 중으로 전환한다.
+agentProposable: true
+allowedRoles: [baker, manager, agent]
+parameters:
+  plan:
+    apiName: plan
+    type: objectRef
+    objectType: ProductionPlan
+    displayName: 생산계획
+rules:
+  - type: modifyObject
+    target: {param: plan, objectType: ProductionPlan}
+    expectedStatus: [planned]
+    properties:
+      - property: status
+        value: in_progress

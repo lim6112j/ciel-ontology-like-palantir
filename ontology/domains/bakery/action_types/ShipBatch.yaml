@@ -1,0 +1,29 @@
+apiName: ShipBatch
+displayName: 배치 출하
+description: 구운 배치를 매장으로 출하한다. 출하 수량만큼 매장 재고가 늘어난다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  store:
+    apiName: store
+    type: objectRef
+    objectType: Store
+    displayName: 매장
+  quantity:
+    apiName: quantity
+    type: integer
+    displayName: 출하수량
+    required: false
+  shipDate:
+    apiName: shipDate
+    type: date
+    displayName: 출하일
+    required: false
+rules:
+  - type: runFunction
+    function: shipBatch

@@ -1,0 +1,62 @@
+apiName: ProductionPlan
+displayName: 생산계획
+pluralDisplayName: 생산계획
+description: 특정 제품을 특정 일자에 만들기로 한 생산 계획. 완료 시 배치가 생겨난다.
+primaryKey: planNo
+properties:
+  planNo:
+    apiName: planNo
+    displayName: 계획번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  planDate:
+    apiName: planDate
+    displayName: 계획일
+    type: date
+    required: true
+    indexed: true
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true
+  plannedQty:
+    apiName: plannedQty
+    displayName: 계획수량
+    type: integer
+    required: true
+    min: 1
+  producedQty:
+    apiName: producedQty
+    displayName: 생산수량
+    type: integer
+    min: 0
+    defaultValue: 0
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [planned, in_progress, completed, cancelled]
+    required: true
+    indexed: true
+    defaultValue: planned
+  note:
+    apiName: note
+    displayName: 비고
+    type: text
+stateMachine:
+  property: status
+  initial: planned
+  transitions:
+    - from: planned
+      to: in_progress
+    - from: in_progress
+      to: completed
+    - from: planned
+      to: cancelled
+    - from: in_progress
+      to: cancelled

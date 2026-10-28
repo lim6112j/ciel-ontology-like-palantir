@@ -1,0 +1,20 @@
+apiName: batchPlannerAgent
+displayName: 생산 계획 에이전트
+description: 소비기한 임박 배치와 매장 재고를 보고 생산계획·출하·폐기를 제안한다.
+kind: dispatch
+systemPromptFile: prompts/batch_planner.md
+temperature: 0.1
+maxTurns: 12
+maxTokens: 4096
+maxProposals: 3
+maxPageSize: 10
+allowedActionTypes:
+  - CreateProductionPlan
+  - StartProductionPlan
+  - CompleteProductionPlan
+  - ShipBatch
+  - WasteBatch
+allowedFunctions:
+  - expiringBatches
+  - storeStock
+  - productionSummary

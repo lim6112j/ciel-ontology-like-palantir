@@ -1,0 +1,12 @@
+functions:
+  - apiName: productionSummary
+    displayName: 생산 현황 요약
+    description: 지정 일자의 생산계획과 배치 현황을 요약해 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.bakery.functions.read.stock.production_summary
+    parameters:
+      planDate:
+        apiName: planDate
+        type: date
+        required: false

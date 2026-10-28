@@ -1,0 +1,16 @@
+functions:
+  - apiName: completeProductionPlan
+    displayName: 생산 완료
+    description: 생산계획을 완료하고 실제 수량만큼 구운 배치를 생성·연결한다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.production.complete_production_plan
+    parameters:
+      plan:
+        apiName: plan
+        type: objectRef
+        objectType: ProductionPlan
+        required: true
+      producedQty:
+        apiName: producedQty
+        type: integer
+        required: false

@@ -1,0 +1,42 @@
+apiName: StoreStock
+displayName: 매장재고
+pluralDisplayName: 매장재고
+description: 매장별·제품별 재고 수량. 매장당 제품마다 한 건만 존재한다.
+primaryKey: stockNo
+properties:
+  stockNo:
+    apiName: stockNo
+    displayName: 재고번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  storeRid:
+    apiName: storeRid
+    displayName: 매장
+    type: objectRef
+    objectType: Store
+    required: true
+    indexed: true
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true
+  quantity:
+    apiName: quantity
+    displayName: 재고수량
+    type: integer
+    required: true
+    min: 0
+  updatedOn:
+    apiName: updatedOn
+    displayName: 갱신일
+    type: date
+    required: true
+indexes:
+  - name: ix_bakery_storestock_storeproduct
+    properties: [storeRid, productRid]
+    unique: true

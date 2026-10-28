@@ -1,0 +1,19 @@
+apiName: CompleteProductionPlan
+displayName: 생산 완료
+description: 진행 중 생산계획을 완료 처리하고 실제 생산수량만큼 구운 배치를 만든다.
+agentProposable: true
+allowedRoles: [baker, manager, agent]
+parameters:
+  plan:
+    apiName: plan
+    type: objectRef
+    objectType: ProductionPlan
+    displayName: 생산계획
+  producedQty:
+    apiName: producedQty
+    type: integer
+    displayName: 생산수량
+    required: false
+rules:
+  - type: runFunction
+    function: completeProductionPlan

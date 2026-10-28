@@ -1,0 +1,29 @@
+apiName: WasteBatch
+displayName: 배치 폐기
+description: 계획 또는 구운 상태의 배치를 폐기한다. 부분 폐기면 잔량이 배치에 남는다.
+agentProposable: true
+allowedRoles: [manager, baker, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  reason:
+    apiName: reason
+    type: enum
+    values: [quality, expiry, damage, other]
+    displayName: 사유
+  quantity:
+    apiName: quantity
+    type: integer
+    displayName: 폐기수량
+    required: false
+  wastedOn:
+    apiName: wastedOn
+    type: date
+    displayName: 폐기일
+    required: false
+rules:
+  - type: runFunction
+    function: wasteBatch

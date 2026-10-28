@@ -1,0 +1,18 @@
+functions:
+  - apiName: storeStock
+    displayName: 매장 재고 조회
+    description: 매장별 재고 현황을 제품명과 함께 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.bakery.functions.read.stock.store_stock
+    parameters:
+      store:
+        apiName: store
+        type: objectRef
+        objectType: Store
+        required: true
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: false

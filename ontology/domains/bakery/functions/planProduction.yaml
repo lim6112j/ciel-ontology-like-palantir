@@ -1,0 +1,24 @@
+functions:
+  - apiName: planProduction
+    displayName: 생산계획 생성
+    description: 제품 활성 여부를 확인하고 생산계획을 생성한다.
+    kind: write
+    implementation: ontology_runtime.domains.bakery.functions.write.production.plan_production
+    parameters:
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: true
+      planDate:
+        apiName: planDate
+        type: date
+        required: true
+      plannedQty:
+        apiName: plannedQty
+        type: integer
+        required: true
+      note:
+        apiName: note
+        type: text
+        required: false

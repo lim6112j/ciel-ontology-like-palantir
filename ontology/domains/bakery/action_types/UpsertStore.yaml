@@ -1,0 +1,22 @@
+apiName: UpsertStore
+displayName: 매장 등록/수정
+description: 매장번호로 매장을 신규 등록하거나 기존 매장 정보를 갱신한다.
+agentProposable: false
+allowedRoles: [manager]
+parameters:
+  storeNo:
+    apiName: storeNo
+    type: string
+    displayName: 매장번호
+  name:
+    apiName: name
+    type: string
+    displayName: 매장명
+  openedOn:
+    apiName: openedOn
+    type: date
+    displayName: 개점일
+    required: false
+rules:
+  - type: runFunction
+    function: upsertStore
