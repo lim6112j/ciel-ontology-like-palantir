@@ -1,0 +1,17 @@
+functions:
+  - apiName: wasteHistory
+    displayName: 폐기 이력
+    description: 폐기기록(WasteRecord)을 제품·기간으로 조회하고 사유별로 집계한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.bakery.functions.read.waste.waste_history
+    parameters:
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: false
+      withinDays:
+        apiName: withinDays
+        type: integer
+        required: false

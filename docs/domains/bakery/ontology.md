@@ -206,6 +206,7 @@
 - **upsertProduct** (write) — SKU로 제품을 찾아 있으면 수정, 없으면 생성한다.
 - **upsertStore** (write) — 매장번호로 매장을 찾아 있으면 수정, 없으면 생성한다.
 - **wasteBatch** (write) — 폐기기록을 남기고 배치 상태를 wasted로 바꾼다. 부분 폐기는 잔량만 남긴다.
+- **wasteHistory** (read) — 폐기기록(WasteRecord)을 제품·기간으로 조회하고 사유별로 집계한다.
 
 ## 에이전트
 

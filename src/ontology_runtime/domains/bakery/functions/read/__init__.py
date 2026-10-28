@@ -1,1 +1,1 @@
-"""Package marker."""
+"""Read functions for the bakery domain."""

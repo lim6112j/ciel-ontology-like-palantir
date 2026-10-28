@@ -416,3 +416,24 @@ async def test_production_summary_read_function(
     assert result["count"] == 2
     assert result["byStatus"].get("planned") == 1
     assert result["byStatus"].get("in_progress") == 1
+
+
+async def test_waste_history_read_function(registry: SchemaRegistry, session: AsyncSession) -> None:
+    runtime = await _seeded_session(registry, session)
+
+    # Seed wastes the first planned batch (B-00002, 통밀식빵) for expiry.
+    result = await runtime.run_function("wasteHistory", {})
+    assert result["count"] == 1
+    assert result["totalQuantity"] == 25
+    assert result["byReason"] == {"expiry": 25}
+    assert result["records"][0]["batchNo"] == "B-00002"
+
+    # Filtering by a product with no waste returns an empty, well-formed result.
+    product = (
+        await runtime.sets.search(
+            "Product", filter={"field": "sku", "op": "eq", "value": "B0004"}, page_size=1
+        )
+    ).objects[0]
+    empty = await runtime.run_function("wasteHistory", {"product": product.rid})
+    assert empty["count"] == 0
+    assert empty["records"] == []

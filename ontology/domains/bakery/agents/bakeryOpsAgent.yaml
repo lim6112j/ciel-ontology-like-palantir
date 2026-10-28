@@ -13,3 +13,4 @@ allowedFunctions:
   - expiringBatches
   - storeStock
   - productionSummary
+  - wasteHistory
