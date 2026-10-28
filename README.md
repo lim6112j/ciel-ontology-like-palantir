@@ -12,6 +12,8 @@ Palantir Foundry의 **온톨로지(object type / link type / action type / funct
 
 - [구조 상세](구조상세.md) — 실행 경로, SchemaRegistry, 함수/액션 관계, 상태 전이,
   AI 에이전트의 역할, 스키마에서 생성되는 API·타입·문서·인덱스의 동작 방식
+- [온톨로지 객체 개발](온톨로지객체개발.md) — 여러 사업 문서로부터 온톨로지
+  객체/링크/액션을 추출하는 best practice (도메인 분류, 용어 사전, YAML-first 워크플로우)
 - [온톨로지 스키마](docs/domains/liquor/ontology.md) — 스키마에서 자동 생성되는 객체/링크/액션/함수/에이전트 요약
 
 ## 빠른 시작
