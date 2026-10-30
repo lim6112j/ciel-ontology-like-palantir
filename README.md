@@ -1,8 +1,8 @@
-# 주류 도매 온톨로지 + AI 에이전트
+# 온톨로지 런타임 + AI 에이전트
 
 Palantir Foundry의 **온톨로지(object type / link type / action type / function)** 와
-**제안-승인 방식 AI 에이전트**를 로컬에서 구현한 런타임입니다. 도메인은 한국 주류 도매
-사업자의 영업·배송·기사 업무입니다.
+**제안-승인 방식 AI 에이전트**를 로컬에서 구현한 런타임입니다. 기본 도메인은 한국 주류 도매
+사업자의 영업·배송·기사 업무이며, 베이커리 유통·막걸리 양조장 도메인도 함께 실려 있습니다.
 
 - Foundry 계정 없이 동작하며, 스키마는 YAML이 단일 소스입니다.
 - OSDK 호환 형태(`apiName`, `rid`, `primaryKey`, object set, `validate`/`apply`,
@@ -15,6 +15,8 @@ Palantir Foundry의 **온톨로지(object type / link type / action type / funct
 - [온톨로지 객체 개발](온톨로지객체개발.md) — 여러 사업 문서로부터 온톨로지
   객체/링크/액션을 추출하는 best practice (도메인 분류, 용어 사전, YAML-first 워크플로우)
 - [온톨로지 스키마](docs/domains/liquor/ontology.md) — 스키마에서 자동 생성되는 객체/링크/액션/함수/에이전트 요약
+  (도메인별로 `docs/domains/<name>/ontology.md` 생성: [bakery](docs/domains/bakery/ontology.md),
+  [makgeolli](docs/domains/makgeolli/ontology.md))
 
 ## 빠른 시작
 
@@ -109,19 +111,66 @@ curl -s -X POST localhost:8001/api/agents/bakeryOpsAgent/invoke \
   -d '{"input":"오늘 생산 현황과 소비기한 임박 배치를 요약해줘"}' | jq
 ```
 
-### 두 도메인 동시 실행
+### makgeolli
 
-터미널 두 개에서 `./liquor.sh`와 `./bakery.sh`를 각각 실행하면 된다. 스크립트가 도메인과
-DB 접속을 고정하므로 env 누락으로 두 인스턴스가 한 DB를 공유하는 사고를 막는다.
+makgeolli(막걸리 양조장)도 bakery와 같은 패턴이다. 양조(발효→숙성→병입)·온도 관리·
+판매·유통·재고를 다루며, 제품마다 유통기한(1~30일)과 발효·숙성일수, 권장 온도 범위가
+속성으로 정의되어 있다.
 
-| | liquor | bakery |
-|---|---|---|
-| 포트 | 8000 | 8001 |
-| DB | `ontology` | `ontology_bakery` |
-| DB 환경변수 | `DATABASE_URL_LIQUOR` (또는 기본 `DATABASE_URL`) | `DATABASE_URL_BAKERY` |
+```bash
+docker compose up -d db
+./makgeolli.sh    # DB 생성 → 마이그레이션 → 인덱스 → 빈 DB면 시드 → :8002 기동
+cd apps/web && pnpm dev    # 랜딩에서 양조장 도메인 선택
+```
+
+`makgeolli.sh`는 다음 env로 재정의할 수 있다: `DATABASE_URL_MAKGEOLLI`(접속 문자열),
+`MAKGEOLLI_DB_NAME`(DB 이름, 기본 `ontology_makgeolli`).
+
+수동으로 할 때는:
+
+```bash
+# 1) makgeolli 전용 DB 생성 (최초 1회)
+docker exec -it ontology-db createdb -U ontology ontology_makgeolli
+
+# 2) 마이그레이션 + 인덱스 + 시드
+export MAKGEOLLI_DB=postgresql+asyncpg://ontology:ontology@localhost:55432/ontology_makgeolli
+DATABASE_URL=$MAKGEOLLI_DB uv run alembic upgrade head
+DATABASE_URL_MAKGEOLLI=$MAKGEOLLI_DB uv run ontology --domain makgeolli sync-indexes
+DATABASE_URL_MAKGEOLLI=$MAKGEOLLI_DB uv run ontology --domain makgeolli seed --seed 42
+
+# 3) API (포트 8002)
+ONTOLOGY_DOMAIN=makgeolli DATABASE_URL_MAKGEOLLI=$MAKGEOLLI_DB \
+  uv run uvicorn ontology_runtime.api.app:app --port 8002
+```
+
+- 전체 시연: `DATABASE_URL_MAKGEOLLI=$MAKGEOLLI_DB uv run ontology --domain makgeolli demo`
+  (파이프라인 진행률 → 온도 이탈 → 병입 → 소비기한 임박 트레이스)
+- 스키마 문서 재생성: `uv run ontology --domain makgeolli docs`
+- API 스모크:
+
+```bash
+curl -s localhost:8002/api/ontology/objectTypes | jq '.data[].apiName'
+# Product, RawMaterial, Tank, Batch, Customer, SalesOrder, TempReading, ...
+
+curl -s -X POST localhost:8002/api/agents/brewPlannerAgent/invoke \
+  -H 'content-type: application/json' -H 'X-Actor: manager01' \
+  -d '{"input":"발효·숙성 현황과 온도 이탈 배치를 확인해줘"}' | jq
+```
+
+### 세 도메인 동시 실행
+
+터미널마다 `./liquor.sh`, `./bakery.sh`, `./makgeolli.sh`를 각각 실행하면 된다. 스크립트가
+도메인과 DB 접속을 고정하므로 env 누락으로 여러 인스턴스가 한 DB를 공유하는 사고를 막는다.
+
+| | liquor | bakery | makgeolli |
+|---|---|---|---|
+| 포트 | 8000 | 8001 | 8002 |
+| DB | `ontology` | `ontology_bakery` | `ontology_makgeolli` |
+| DB 환경변수 | `DATABASE_URL_LIQUOR` (또는 기본 `DATABASE_URL`) | `DATABASE_URL_BAKERY` | `DATABASE_URL_MAKGEOLLI` |
 
 두 인스턴스는 서로의 데이터를 절대 보지 못합니다(도메인 격리). 웹 콘솔은 랜딩 페이지에서
-도메인을 고르고, 각 도메인의 `apiBase`(`/api`, `/api/bakery`)로 알아서 라우팅됩니다.
+도메인을 고르고, 각 도메인의 `apiBase`(`/api`, `/api/bakery`, `/api/makgeolli`)로 알아서
+라우팅됩니다.
 
 ## 구조
 
@@ -131,6 +180,7 @@ ontology/
   domains/
     liquor/             # 주류 도매 (16 object types, 25 links, 25 actions, 21 functions, 4 agents)
     bakery/             # 베이커리 유통 (격리 예시: 같은 이름의 Product를 다른 속성으로 정의)
+    makgeolli/          # 막걸리 양조장 (발효·숙성·온도 관리, 유통기한 ≤30일 제품 10종)
 src/ontology_runtime/
   loader.py registry.py # YAML → 메타모델 → 역링크/인덱스 도출 (도메인+플랫폼 병합)
   runtime.py            # 레지스트리 + 스토어 + 액션/함수 파사드
@@ -145,6 +195,7 @@ src/ontology_runtime/
   domains/
     liquor/             # 주류 도메인 함수·시드·데모
     bakery/             # 베이커리 도메인 함수·시드
+    makgeolli/          # 양조장 도메인 함수·시드·불변식·데모
   clientgen/            # TypeScript 클라이언트 + 웹 번들 생성
 apps/web/               # React 운영 콘솔 (랜딩 + 도메인별 콘솔)
 ```
