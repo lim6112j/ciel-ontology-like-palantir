@@ -1,0 +1,57 @@
+apiName: SalesOrderLine
+displayName: 주문라인
+pluralDisplayName: 주문라인
+description: 주문 한 행. 단가×수량으로 라인 금액을 검증한다.
+primaryKey: lineNo
+properties:
+  lineNo:
+    apiName: lineNo
+    displayName: 라인번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  orderRid:
+    apiName: orderRid
+    displayName: 주문
+    type: objectRef
+    objectType: SalesOrder
+    required: true
+    indexed: true
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true
+  cases:
+    apiName: cases
+    displayName: 수량(병)
+    type: integer
+    required: true
+    min: 1
+  unitPrice:
+    apiName: unitPrice
+    displayName: 단가(원)
+    type: integer
+    required: true
+    min: 0
+  lineAmount:
+    apiName: lineAmount
+    displayName: 라인금액(원)
+    type: bigint
+    required: true
+    min: 0
+  productName:
+    apiName: productName
+    displayName: 제품명
+    type: string
+    maxLength: 120
+invariants:
+  - apiName: lineAmountMatchesUnitTimesQuantity
+    description: 라인금액은 단가×수량이어야 한다.
+    params:
+      amountProperty: lineAmount
+      unitProperty: unitPrice
+      quantityProperty: cases

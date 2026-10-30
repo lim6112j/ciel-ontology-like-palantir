@@ -1,0 +1,8 @@
+functions:
+  - apiName: reorderSuggestions
+    displayName: 양조 제안
+    description: 최근 수요와 재고·제조 리드타임을 근거로 제품별 양조 제안량을 계산한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.analytics.reorder_suggestions
+    parameters: {}

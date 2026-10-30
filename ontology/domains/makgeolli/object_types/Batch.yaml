@@ -1,0 +1,103 @@
+apiName: Batch
+displayName: 양조배치
+pluralDisplayName: 양조배치
+description: 한 번의 양조. 발효→숙성→병입을 거치며 병입일과 제품 유통기한으로 소비기한이 정해진다.
+primaryKey: batchNo
+properties:
+  batchNo:
+    apiName: batchNo
+    displayName: 배치번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true
+  tankRid:
+    apiName: tankRid
+    displayName: 탱크
+    type: objectRef
+    objectType: Tank
+    indexed: true
+  brewDate:
+    apiName: brewDate
+    displayName: 양조일
+    type: date
+    required: true
+    indexed: true
+  fermentationDueOn:
+    apiName: fermentationDueOn
+    displayName: 발효완료예정일
+    type: date
+    required: true
+    indexed: true
+  agingDueOn:
+    apiName: agingDueOn
+    displayName: 숙성완료예정일
+    type: date
+    required: true
+  fermentationTempC:
+    apiName: fermentationTempC
+    displayName: 발효목표온도(°C)
+    type: decimal
+    required: true
+  agingTempC:
+    apiName: agingTempC
+    displayName: 숙성목표온도(°C)
+    type: decimal
+    required: true
+  fermentedOn:
+    apiName: fermentedOn
+    displayName: 발효완료일
+    type: date
+  bottledOn:
+    apiName: bottledOn
+    displayName: 병입일
+    type: date
+  expiresOn:
+    apiName: expiresOn
+    displayName: 소비기한
+    type: date
+    indexed: true
+  volumeL:
+    apiName: volumeL
+    displayName: 양조량(L)
+    type: decimal
+    required: true
+    min: 0
+  bottledQty:
+    apiName: bottledQty
+    displayName: 병입수량(병)
+    type: integer
+    min: 0
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [fermenting, aging, ready, shipped, wasted]
+    required: true
+    indexed: true
+    defaultValue: fermenting
+stateMachine:
+  property: status
+  initial: fermenting
+  transitions:
+    - {from: fermenting, to: aging}
+    - {from: aging, to: ready}
+    - {from: ready, to: shipped}
+    - {from: ready, to: wasted}
+    - {from: fermenting, to: wasted}
+    - {from: aging, to: wasted}
+invariants:
+  - apiName: batchExpiryMatchesShelfLife
+    description: 소비기한은 병입일에 제품 유통기한(일)을 더한 날이어야 한다.
+    params:
+      productProperty: productRid
+      startProperty: bottledOn
+      expiryProperty: expiresOn
+      shelfLifeProperty: shelfLifeDays

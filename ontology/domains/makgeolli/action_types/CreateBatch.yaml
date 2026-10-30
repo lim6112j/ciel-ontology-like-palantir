@@ -1,0 +1,34 @@
+apiName: CreateBatch
+displayName: 양조 시작
+description: 제품·양조일·양조량으로 배치를 생성하고 파생일과 목표온도를 계산한다.
+agentProposable: true
+allowedRoles: [manager, brewer, agent]
+parameters:
+  product:
+    apiName: product
+    type: objectRef
+    objectType: Product
+    displayName: 제품
+  tank:
+    apiName: tank
+    type: objectRef
+    objectType: Tank
+    displayName: 탱크
+    required: false
+  brewDate:
+    apiName: brewDate
+    type: date
+    displayName: 양조일
+  volumeL:
+    apiName: volumeL
+    type: decimal
+    displayName: 양조량(L)
+  materials:
+    apiName: materials
+    type: json
+    displayName: 투입원자재
+    description: "[{materialRid, amount}] 형태로 양조에 투입한 원자재를 기록한다."
+    required: false
+rules:
+  - type: runFunction
+    function: createBatch

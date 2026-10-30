@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: batchTempReadings
+    displayName: 온도측정
+    fromObjectType: Batch
+    fromApiName: readings
+    fromCardinality: many
+    toObjectType: TempReading
+    toApiName: batch
+    toCardinality: one

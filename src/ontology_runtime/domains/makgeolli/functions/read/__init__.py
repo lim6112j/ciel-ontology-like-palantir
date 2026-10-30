@@ -1,0 +1,1 @@
+"""makgeolli domain package."""

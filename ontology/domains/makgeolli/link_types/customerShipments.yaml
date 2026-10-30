@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: customerShipments
+    displayName: 출하
+    fromObjectType: Customer
+    fromApiName: shipments
+    fromCardinality: many
+    toObjectType: Shipment
+    toApiName: customer
+    toCardinality: one

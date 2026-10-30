@@ -1,0 +1,35 @@
+apiName: ShipBatch
+displayName: 배치 출하
+description: 병입 완료 배치를 판매처로 출하하고 창고 재고를 차감한다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  customer:
+    apiName: customer
+    type: objectRef
+    objectType: Customer
+    displayName: 판매처
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 주문
+    required: false
+  quantity:
+    apiName: quantity
+    type: integer
+    displayName: 출하수량(병)
+    required: false
+  shipDate:
+    apiName: shipDate
+    type: date
+    displayName: 출하일
+    required: false
+rules:
+  - type: runFunction
+    function: shipBatch

@@ -1,0 +1,19 @@
+apiName: ReceiveShipment
+displayName: 출하 입고
+description: 배송 중 출하를 입고 처리하고 판매처 재고를 올린다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  shipment:
+    apiName: shipment
+    type: objectRef
+    objectType: Shipment
+    displayName: 출하
+  receivedOn:
+    apiName: receivedOn
+    type: date
+    displayName: 입고일
+    required: false
+rules:
+  - type: runFunction
+    function: receiveShipment

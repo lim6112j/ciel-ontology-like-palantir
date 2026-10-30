@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: customerOrders
+    displayName: 판매주문
+    fromObjectType: Customer
+    fromApiName: orders
+    fromCardinality: many
+    toObjectType: SalesOrder
+    toApiName: customer
+    toCardinality: one

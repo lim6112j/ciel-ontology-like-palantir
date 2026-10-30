@@ -1,0 +1,20 @@
+functions:
+  - apiName: completeAging
+    displayName: 숙성 완료·병입
+    description: 숙성 중 배치를 병입해 소비기한을 부여하고 창고 재고를 생성한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.brewing.complete_aging
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      bottledOn:
+        apiName: bottledOn
+        type: date
+        required: false
+      bottledQty:
+        apiName: bottledQty
+        type: integer
+        required: false

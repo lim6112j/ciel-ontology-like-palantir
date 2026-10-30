@@ -1,0 +1,16 @@
+functions:
+  - apiName: completeFermentation
+    displayName: 발효 완료
+    description: 발효 중 배치를 숙성 단계로 전환한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.brewing.complete_fermentation
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      fermentedOn:
+        apiName: fermentedOn
+        type: date
+        required: false

@@ -1,0 +1,17 @@
+functions:
+  - apiName: salesSummary
+    displayName: 판매 요약
+    description: 기간별 매출·수량·상태별 주문수·상위 제품을 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.analytics.sales_summary
+    parameters:
+      withinDays:
+        apiName: withinDays
+        type: integer
+        required: false
+      customer:
+        apiName: customer
+        type: objectRef
+        objectType: Customer
+        required: false

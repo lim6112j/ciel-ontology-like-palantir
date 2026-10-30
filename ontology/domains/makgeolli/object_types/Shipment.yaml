@@ -1,0 +1,63 @@
+apiName: Shipment
+displayName: 출하
+pluralDisplayName: 출하
+description: 병입 완료 배치를 판매처로 출하한 기록.
+primaryKey: shipmentNo
+properties:
+  shipmentNo:
+    apiName: shipmentNo
+    displayName: 출하번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  shipDate:
+    apiName: shipDate
+    displayName: 출하일
+    type: date
+    required: true
+    indexed: true
+  batchRid:
+    apiName: batchRid
+    displayName: 배치
+    type: objectRef
+    objectType: Batch
+    required: true
+    indexed: true
+  customerRid:
+    apiName: customerRid
+    displayName: 판매처
+    type: objectRef
+    objectType: Customer
+    required: true
+    indexed: true
+  orderRid:
+    apiName: orderRid
+    displayName: 주문
+    type: objectRef
+    objectType: SalesOrder
+    indexed: true
+  quantity:
+    apiName: quantity
+    displayName: 출하수량(병)
+    type: integer
+    required: true
+    min: 1
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [in_transit, delivered, cancelled]
+    required: true
+    indexed: true
+    defaultValue: in_transit
+  deliveredOn:
+    apiName: deliveredOn
+    displayName: 도착일
+    type: date
+stateMachine:
+  property: status
+  initial: in_transit
+  transitions:
+    - {from: in_transit, to: delivered}
+    - {from: in_transit, to: cancelled}

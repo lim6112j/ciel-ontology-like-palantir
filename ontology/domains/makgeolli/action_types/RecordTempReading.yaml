@@ -1,0 +1,28 @@
+apiName: RecordTempReading
+displayName: 온도 측정 기록
+description: 배치의 발효·숙성 온도를 기록하고 목표범위 대비 허용여부를 판정한다.
+agentProposable: true
+allowedRoles: [manager, brewer, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  tempC:
+    apiName: tempC
+    type: decimal
+    displayName: 측정온도(°C)
+  stage:
+    apiName: stage
+    type: enum
+    values: [fermentation, aging]
+    displayName: 단계
+  recordedAt:
+    apiName: recordedAt
+    type: string
+    displayName: 측정시각
+    required: false
+rules:
+  - type: runFunction
+    function: recordTempReading

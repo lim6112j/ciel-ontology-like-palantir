@@ -1,0 +1,24 @@
+functions:
+  - apiName: createSalesOrder
+    displayName: 판매주문 생성
+    description: 판매처 주문을 라인과 함께 생성하고 합계를 계산한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.sales.create_sales_order
+    parameters:
+      customer:
+        apiName: customer
+        type: objectRef
+        objectType: Customer
+        required: true
+      orderDate:
+        apiName: orderDate
+        type: date
+        required: true
+      lines:
+        apiName: lines
+        type: json
+        required: true
+      note:
+        apiName: note
+        type: text
+        required: false

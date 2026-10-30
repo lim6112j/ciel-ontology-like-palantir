@@ -1,0 +1,24 @@
+apiName: CompleteAging
+displayName: 숙성 완료·병입
+description: 숙성 중 배치를 병입해 소비기한을 부여하고 창고 재고를 생성한다.
+agentProposable: true
+allowedRoles: [manager, brewer, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  bottledOn:
+    apiName: bottledOn
+    type: date
+    displayName: 병입일
+    required: false
+  bottledQty:
+    apiName: bottledQty
+    type: integer
+    displayName: 병입수량(병)
+    required: false
+rules:
+  - type: runFunction
+    function: completeAging

@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: productWarehouseStock
+    displayName: 창고재고
+    fromObjectType: Product
+    fromApiName: warehouseStocks
+    fromCardinality: many
+    toObjectType: WarehouseStock
+    toApiName: product
+    toCardinality: one

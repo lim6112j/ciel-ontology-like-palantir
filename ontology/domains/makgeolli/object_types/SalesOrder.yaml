@@ -1,0 +1,61 @@
+apiName: SalesOrder
+displayName: 판매주문
+pluralDisplayName: 판매주문
+description: 판매처 주문. 합계는 라인에서 계산해 저장한다.
+primaryKey: orderNo
+properties:
+  orderNo:
+    apiName: orderNo
+    displayName: 주문번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  customerRid:
+    apiName: customerRid
+    displayName: 판매처
+    type: objectRef
+    objectType: Customer
+    required: true
+    indexed: true
+  orderDate:
+    apiName: orderDate
+    displayName: 주문일
+    type: date
+    required: true
+    indexed: true
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [draft, confirmed, shipped, delivered, cancelled]
+    required: true
+    indexed: true
+    defaultValue: draft
+  totalAmount:
+    apiName: totalAmount
+    displayName: 총액(원)
+    type: bigint
+    min: 0
+    indexed: true
+  note:
+    apiName: note
+    displayName: 비고
+    type: text
+stateMachine:
+  property: status
+  initial: draft
+  transitions:
+    - {from: draft, to: confirmed}
+    - {from: confirmed, to: shipped}
+    - {from: shipped, to: delivered}
+    - {from: draft, to: cancelled}
+    - {from: confirmed, to: cancelled}
+invariants:
+  - apiName: totalsMatchLinkedLines
+    description: totalAmount는 주문 라인 금액의 합과 같아야 한다.
+    params:
+      parentType: SalesOrder
+      linkName: lines
+      totalProperty: totalAmount
+      lineProperty: lineAmount

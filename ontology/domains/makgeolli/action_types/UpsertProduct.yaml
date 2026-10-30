@@ -1,0 +1,67 @@
+apiName: UpsertProduct
+displayName: 제품 등록/수정
+description: SKU로 제품을 신규 등록하거나 기존 제품 정보를 갱신한다.
+agentProposable: false
+allowedRoles: [manager]
+parameters:
+  sku:
+    apiName: sku
+    type: string
+    displayName: SKU
+  name:
+    apiName: name
+    type: string
+    displayName: 제품명
+  category:
+    apiName: category
+    type: enum
+    values: [생막걸리, 탁주, 청주, 스파클링, 과실주]
+    displayName: 분류
+  alcoholPercent:
+    apiName: alcoholPercent
+    type: decimal
+    displayName: 도수(%)
+  shelfLifeDays:
+    apiName: shelfLifeDays
+    type: integer
+    displayName: 유통기한(일)
+  fermentationDays:
+    apiName: fermentationDays
+    type: integer
+    displayName: 발효일수
+  agingDays:
+    apiName: agingDays
+    type: integer
+    displayName: 숙성일수
+  fermentationTempMinC:
+    apiName: fermentationTempMinC
+    type: decimal
+    displayName: 발효권장최저온도(°C)
+  fermentationTempMaxC:
+    apiName: fermentationTempMaxC
+    type: decimal
+    displayName: 발효권장최고온도(°C)
+  agingTempMinC:
+    apiName: agingTempMinC
+    type: decimal
+    displayName: 숙성권장최저온도(°C)
+  agingTempMaxC:
+    apiName: agingTempMaxC
+    type: decimal
+    displayName: 숙성권장최고온도(°C)
+  volumeMl:
+    apiName: volumeMl
+    type: integer
+    displayName: 용량(ml)
+  unitPrice:
+    apiName: unitPrice
+    type: integer
+    displayName: 단가(원)
+  active:
+    apiName: active
+    type: boolean
+    displayName: 판매중
+    required: false
+rules:
+  - type: runFunction
+    function: upsertProduct

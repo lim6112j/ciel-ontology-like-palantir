@@ -23,6 +23,7 @@ def test_domains_lists_all_domains(capsys) -> None:
     output = capsys.readouterr().out
     assert "liquor" in output
     assert "bakery" in output
+    assert "makgeolli" in output
 
 
 def test_schema_validate_reports_errors(monkeypatch, capsys) -> None:
@@ -52,9 +53,10 @@ def test_export_web_writes_per_domain_clients_and_manifest(tmp_path: Path, capsy
 
     assert (target / "liquor" / "client.ts").exists()
     assert (target / "bakery" / "client.ts").exists()
+    assert (target / "makgeolli" / "client.ts").exists()
 
     manifest = json.loads((target / "domains.json").read_text(encoding="utf-8"))
-    assert [entry["apiName"] for entry in manifest] == ["liquor", "bakery"]
+    assert [entry["apiName"] for entry in manifest] == ["liquor", "bakery", "makgeolli"]
     assert manifest[0]["apiBase"] == "/api/liquor"
 
     ts = (target / "domains.ts").read_text(encoding="utf-8")

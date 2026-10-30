@@ -1,0 +1,23 @@
+apiName: AdjustBatchTemp
+displayName: 목표온도 조정
+description: 온도 이탈 배치의 목표온도를 탱크 조절범위 내에서 변경한다.
+agentProposable: true
+allowedRoles: [manager, brewer, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  stage:
+    apiName: stage
+    type: enum
+    values: [fermentation, aging]
+    displayName: 단계
+  targetTempC:
+    apiName: targetTempC
+    type: decimal
+    displayName: 새목표온도(°C)
+rules:
+  - type: runFunction
+    function: adjustBatchTemp

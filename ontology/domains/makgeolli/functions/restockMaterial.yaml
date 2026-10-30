@@ -1,0 +1,20 @@
+functions:
+  - apiName: restockMaterial
+    displayName: 원자재 입고
+    description: 원자재 입고분을 현재재고에 더한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.inventory.restock_material
+    parameters:
+      material:
+        apiName: material
+        type: objectRef
+        objectType: RawMaterial
+        required: true
+      amount:
+        apiName: amount
+        type: decimal
+        required: true
+      restockedOn:
+        apiName: restockedOn
+        type: date
+        required: false

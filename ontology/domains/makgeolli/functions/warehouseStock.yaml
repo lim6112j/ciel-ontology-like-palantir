@@ -1,0 +1,13 @@
+functions:
+  - apiName: warehouseStock
+    displayName: 창고 재고
+    description: 배치별 병입 재고를 소비기한순(FEFO)으로 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.stock.warehouse_stock
+    parameters:
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: false

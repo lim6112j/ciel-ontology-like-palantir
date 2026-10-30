@@ -1,0 +1,23 @@
+functions:
+  - apiName: upsertCustomer
+    displayName: 판매처 등록/수정
+    description: 판매처번호로 판매처를 신규 등록하거나 기존 정보를 갱신한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.master_data.upsert_customer
+    parameters:
+      customerNo:
+        apiName: customerNo
+        type: string
+        required: true
+      name:
+        apiName: name
+        type: string
+        required: true
+      type:
+        apiName: type
+        type: string
+        required: true
+      region:
+        apiName: region
+        type: string
+        required: false

@@ -1,0 +1,20 @@
+functions:
+  - apiName: adjustBatchTemp
+    displayName: 목표온도 조정
+    description: 온도 이탈 배치의 목표온도를 탱크 조절범위 내에서 변경한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.temp.adjust_batch_temp
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      stage:
+        apiName: stage
+        type: string
+        required: true
+      targetTempC:
+        apiName: targetTempC
+        type: decimal
+        required: true

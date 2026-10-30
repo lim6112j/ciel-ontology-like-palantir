@@ -1,0 +1,42 @@
+apiName: OutletStock
+displayName: 판매처재고
+pluralDisplayName: 판매처재고
+description: 판매처별·제품별 재고 수량. 판매처당 제품마다 한 건만 존재한다.
+primaryKey: stockNo
+properties:
+  stockNo:
+    apiName: stockNo
+    displayName: 재고번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  customerRid:
+    apiName: customerRid
+    displayName: 판매처
+    type: objectRef
+    objectType: Customer
+    required: true
+    indexed: true
+  productRid:
+    apiName: productRid
+    displayName: 제품
+    type: objectRef
+    objectType: Product
+    required: true
+    indexed: true
+  quantity:
+    apiName: quantity
+    displayName: 재고수량(병)
+    type: integer
+    required: true
+    min: 0
+  updatedOn:
+    apiName: updatedOn
+    displayName: 갱신일
+    type: date
+    required: true
+indexes:
+  - name: ix_makgeolli_outletstock_customerproduct
+    properties: [customerRid, productRid]
+    unique: true

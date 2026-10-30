@@ -1,0 +1,29 @@
+functions:
+  - apiName: createBatch
+    displayName: 양조 시작
+    description: 배치를 생성하고 파생일·목표온도를 계산하며 탱크를 점유한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.brewing.create_batch
+    parameters:
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: true
+      tank:
+        apiName: tank
+        type: objectRef
+        objectType: Tank
+        required: false
+      brewDate:
+        apiName: brewDate
+        type: date
+        required: true
+      volumeL:
+        apiName: volumeL
+        type: decimal
+        required: true
+      materials:
+        apiName: materials
+        type: json
+        required: false

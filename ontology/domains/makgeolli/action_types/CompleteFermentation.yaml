@@ -1,0 +1,19 @@
+apiName: CompleteFermentation
+displayName: 발효 완료
+description: 발효 중 배치를 숙성 단계로 전환한다.
+agentProposable: true
+allowedRoles: [manager, brewer, agent]
+parameters:
+  batch:
+    apiName: batch
+    type: objectRef
+    objectType: Batch
+    displayName: 배치
+  fermentedOn:
+    apiName: fermentedOn
+    type: date
+    displayName: 발효완료일
+    required: false
+rules:
+  - type: runFunction
+    function: completeFermentation

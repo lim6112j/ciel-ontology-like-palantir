@@ -25,6 +25,11 @@ def bakery() -> SchemaRegistry:
     return SchemaRegistry.from_domain("bakery")
 
 
+@pytest.fixture(scope="module")
+def makgeolli() -> SchemaRegistry:
+    return SchemaRegistry.from_domain("makgeolli")
+
+
 def test_same_named_type_has_different_definitions(
     liquor: SchemaRegistry, bakery: SchemaRegistry
 ) -> None:
@@ -37,6 +42,20 @@ def test_same_named_type_has_different_definitions(
     assert "shelfLifeDays" in bakery_product.properties
     assert "shelfLifeDays" not in liquor_product.properties
     assert liquor_product.primaryKey == "sku" == bakery_product.primaryKey
+
+
+def test_makgeolli_product_brewing_properties_are_its_own(
+    liquor: SchemaRegistry, makgeolli: SchemaRegistry
+) -> None:
+    # makgeolli reuses the Product name but carries brewing-specific properties.
+    liquor_product = liquor.object_type("Product")
+    makgeolli_product = makgeolli.object_type("Product")
+
+    assert "fermentationDays" in makgeolli_product.properties
+    assert "fermentationDays" not in liquor_product.properties
+    assert "agingTempMinC" in makgeolli_product.properties
+    assert "agingTempMinC" not in liquor_product.properties
+    assert "unitsPerCase" not in makgeolli_product.properties
 
 
 def test_object_types_do_not_leak_between_domains(

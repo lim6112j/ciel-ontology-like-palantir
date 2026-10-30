@@ -1,0 +1,12 @@
+functions:
+  - apiName: productionPipeline
+    displayName: 양조 파이프라인 현황
+    description: 발효·숙성 중 배치의 진행률과 예정일, 목표온도를 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.production.production_pipeline
+    parameters:
+      status:
+        apiName: status
+        type: string
+        required: false

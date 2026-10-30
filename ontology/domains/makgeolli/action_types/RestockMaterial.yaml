@@ -1,0 +1,23 @@
+apiName: RestockMaterial
+displayName: 원자재 입고
+description: 원자재 입고분을 현재재고에 더한다. 에이전트가 제안할 수 없다.
+agentProposable: false
+allowedRoles: [manager]
+parameters:
+  material:
+    apiName: material
+    type: objectRef
+    objectType: RawMaterial
+    displayName: 원자재
+  amount:
+    apiName: amount
+    type: decimal
+    displayName: 입고량
+  restockedOn:
+    apiName: restockedOn
+    type: date
+    displayName: 입고일
+    required: false
+rules:
+  - type: runFunction
+    function: restockMaterial

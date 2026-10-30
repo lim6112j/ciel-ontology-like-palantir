@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: tankBatches
+    displayName: 양조배치
+    fromObjectType: Tank
+    fromApiName: batches
+    fromCardinality: many
+    toObjectType: Batch
+    toApiName: tank
+    toCardinality: one

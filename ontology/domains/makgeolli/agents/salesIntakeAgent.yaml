@@ -1,0 +1,20 @@
+apiName: salesIntakeAgent
+displayName: 판매 접수 에이전트
+description: 판매처의 주문을 해석해 주문 생성·확정·출하를 제안한다.
+kind: intake
+systemPromptFile: prompts/sales_intake.md
+temperature: 0.2
+maxTurns: 10
+maxTokens: 4096
+maxProposals: 3
+maxPageSize: 20
+allowedActionTypes:
+  - CreateSalesOrder
+  - ConfirmSalesOrder
+  - ShipBatch
+  - ReceiveShipment
+allowedFunctions:
+  - warehouseStock
+  - expiringBatches
+  - salesSummary
+  - outletStock

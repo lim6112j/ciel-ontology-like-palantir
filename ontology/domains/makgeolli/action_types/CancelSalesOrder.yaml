@@ -1,0 +1,18 @@
+apiName: CancelSalesOrder
+displayName: 판매주문 취소
+description: 작성 중이거나 확정된 판매주문을 취소한다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 주문
+rules:
+  - type: modifyObject
+    target: {param: order, objectType: SalesOrder}
+    expectedStatus: [draft, confirmed]
+    properties:
+      - property: status
+        value: cancelled

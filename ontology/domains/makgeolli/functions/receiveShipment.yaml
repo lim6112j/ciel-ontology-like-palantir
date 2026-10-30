@@ -1,0 +1,16 @@
+functions:
+  - apiName: receiveShipment
+    displayName: 출하 입고
+    description: 배송 중 출하를 입고 처리하고 판매처 재고를 올린다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.distribution.receive_shipment
+    parameters:
+      shipment:
+        apiName: shipment
+        type: objectRef
+        objectType: Shipment
+        required: true
+      receivedOn:
+        apiName: receivedOn
+        type: date
+        required: false

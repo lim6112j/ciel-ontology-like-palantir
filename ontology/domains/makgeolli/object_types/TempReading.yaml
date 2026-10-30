@@ -1,0 +1,46 @@
+apiName: TempReading
+displayName: 온도측정
+pluralDisplayName: 온도측정
+description: 배치의 발효·숙성 온도 측정 기록. 배치 목표온도 범위 대비 허용여부를 판정한다.
+primaryKey: readingNo
+properties:
+  readingNo:
+    apiName: readingNo
+    displayName: 측정번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  batchRid:
+    apiName: batchRid
+    displayName: 배치
+    type: objectRef
+    objectType: Batch
+    required: true
+    indexed: true
+  recordedAt:
+    apiName: recordedAt
+    displayName: 측정시각
+    type: text
+    required: true
+    maxLength: 25
+  tempC:
+    apiName: tempC
+    displayName: 측정온도(°C)
+    type: decimal
+    required: true
+    min: -5
+    max: 40
+  stage:
+    apiName: stage
+    displayName: 단계
+    type: enum
+    values: [fermentation, aging]
+    required: true
+    indexed: true
+  inRange:
+    apiName: inRange
+    displayName: 범위내
+    type: boolean
+    required: true
+    indexed: true

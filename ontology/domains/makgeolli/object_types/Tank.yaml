@@ -1,0 +1,69 @@
+apiName: Tank
+displayName: 발효조
+pluralDisplayName: 발효조
+description: 발효·숙성에 쓰는 탱크. 온도조절 가능 범위를 속성으로 두어 배치 목표온도 검증에 쓴다.
+primaryKey: tankNo
+properties:
+  tankNo:
+    apiName: tankNo
+    displayName: 탱크번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 명칭
+    type: string
+    required: true
+    maxLength: 120
+  capacityL:
+    apiName: capacityL
+    displayName: 용량(L)
+    type: decimal
+    required: true
+    min: 1
+  kind:
+    apiName: kind
+    displayName: 구분
+    type: enum
+    values: [발효조, 숙성조]
+    required: true
+  tempControl:
+    apiName: tempControl
+    displayName: 온도조절
+    type: boolean
+    required: true
+    defaultValue: false
+  tempMinC:
+    apiName: tempMinC
+    displayName: 조절최저온도(°C)
+    type: decimal
+    required: true
+    min: -10
+    max: 40
+  tempMaxC:
+    apiName: tempMaxC
+    displayName: 조절최고온도(°C)
+    type: decimal
+    required: true
+    min: -10
+    max: 40
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [idle, in_use, cleaning, maintenance]
+    required: true
+    indexed: true
+    defaultValue: idle
+stateMachine:
+  property: status
+  initial: idle
+  transitions:
+    - {from: idle, to: in_use}
+    - {from: in_use, to: idle}
+    - {from: in_use, to: cleaning}
+    - {from: cleaning, to: idle}
+    - {from: idle, to: maintenance}
+    - {from: maintenance, to: idle}

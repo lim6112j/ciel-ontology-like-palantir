@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: lineProduct
+    displayName: 제품
+    fromObjectType: Product
+    fromApiName: orderLines
+    fromCardinality: many
+    toObjectType: SalesOrderLine
+    toApiName: product
+    toCardinality: one

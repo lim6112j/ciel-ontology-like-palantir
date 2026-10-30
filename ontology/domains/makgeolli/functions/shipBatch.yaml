@@ -1,0 +1,30 @@
+functions:
+  - apiName: shipBatch
+    displayName: 배치 출하
+    description: 병입 완료 배치를 판매처로 출하하고 창고 재고를 차감한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.distribution.ship_batch
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      customer:
+        apiName: customer
+        type: objectRef
+        objectType: Customer
+        required: true
+      order:
+        apiName: order
+        type: objectRef
+        objectType: SalesOrder
+        required: false
+      quantity:
+        apiName: quantity
+        type: integer
+        required: false
+      shipDate:
+        apiName: shipDate
+        type: date
+        required: false

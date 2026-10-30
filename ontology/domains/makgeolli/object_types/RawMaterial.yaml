@@ -1,0 +1,49 @@
+apiName: RawMaterial
+displayName: 원자재
+pluralDisplayName: 원자재
+description: 양조 원자재. 현재재고와 발주시점을 추적해 재양조 전 필요량을 확보한다.
+primaryKey: materialNo
+properties:
+  materialNo:
+    apiName: materialNo
+    displayName: 자재번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 자재명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  unit:
+    apiName: unit
+    displayName: 단위
+    type: enum
+    values: [kg, L, g]
+    required: true
+  unitCost:
+    apiName: unitCost
+    displayName: 단위원가(원)
+    type: integer
+    required: true
+    min: 0
+  currentStock:
+    apiName: currentStock
+    displayName: 현재재고
+    type: decimal
+    required: true
+    min: 0
+  reorderPoint:
+    apiName: reorderPoint
+    displayName: 발주시점
+    type: decimal
+    required: true
+    min: 0
+  supplier:
+    apiName: supplier
+    displayName: 공급처
+    type: string
+    maxLength: 120

@@ -1,0 +1,27 @@
+apiName: UpsertCustomer
+displayName: 판매처 등록/수정
+description: 판매처번호로 판매처를 신규 등록하거나 기존 정보를 갱신한다.
+agentProposable: false
+allowedRoles: [manager]
+parameters:
+  customerNo:
+    apiName: customerNo
+    type: string
+    displayName: 판매처번호
+  name:
+    apiName: name
+    type: string
+    displayName: 명칭
+  type:
+    apiName: type
+    type: enum
+    values: [유흥주점, 편의점, 대형마트, 온라인, 직영점]
+    displayName: 유형
+  region:
+    apiName: region
+    type: string
+    displayName: 지역
+    required: false
+rules:
+  - type: runFunction
+    function: upsertCustomer

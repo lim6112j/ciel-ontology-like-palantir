@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: customerOutletStock
+    displayName: 판매처재고
+    fromObjectType: Customer
+    fromApiName: outletStocks
+    fromCardinality: many
+    toObjectType: OutletStock
+    toApiName: customer
+    toCardinality: one

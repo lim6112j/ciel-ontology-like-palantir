@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: recipeMaterials
+    displayName: 원자재
+    fromObjectType: Batch
+    fromApiName: materials
+    fromCardinality: many
+    toObjectType: RawMaterial
+    toApiName: batches
+    toCardinality: many

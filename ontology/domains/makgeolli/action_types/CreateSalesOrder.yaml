@@ -1,0 +1,28 @@
+apiName: CreateSalesOrder
+displayName: 판매주문 생성
+description: 판매처 주문을 라인과 함께 생성하고 합계를 계산한다.
+agentProposable: true
+allowedRoles: [manager, sales, agent]
+parameters:
+  customer:
+    apiName: customer
+    type: objectRef
+    objectType: Customer
+    displayName: 판매처
+  orderDate:
+    apiName: orderDate
+    type: date
+    displayName: 주문일
+  lines:
+    apiName: lines
+    type: json
+    displayName: 주문라인
+    description: "[{productRid, cases}] 형태로 주문 제품과 수량을 넣는다."
+  note:
+    apiName: note
+    type: text
+    displayName: 비고
+    required: false
+rules:
+  - type: runFunction
+    function: createSalesOrder

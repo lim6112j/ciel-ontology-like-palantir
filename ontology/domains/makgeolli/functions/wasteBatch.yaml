@@ -1,0 +1,24 @@
+functions:
+  - apiName: wasteBatch
+    displayName: 배치 폐기
+    description: 배치를 전부 또는 일부 폐기하고 폐기기록을 남긴다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.brewing.waste_batch
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      reason:
+        apiName: reason
+        type: string
+        required: true
+      quantity:
+        apiName: quantity
+        type: integer
+        required: false
+      wastedOn:
+        apiName: wastedOn
+        type: date
+        required: false

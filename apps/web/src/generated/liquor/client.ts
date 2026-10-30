@@ -117,4 +117,4 @@ export const api = {
   agentRuns: () => request<unknown[]>('/agentRuns'),
 };
 
-export const VERSION = 'generated-20261028';
+export const VERSION = 'generated-20261030';

@@ -1,0 +1,39 @@
+apiName: WasteRecord
+displayName: 폐기기록
+pluralDisplayName: 폐기기록
+description: 배치 폐기 기록. 품질·유통기한·파손 사유를 구분해 집계한다.
+primaryKey: wasteNo
+properties:
+  wasteNo:
+    apiName: wasteNo
+    displayName: 폐기번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 40
+  wastedOn:
+    apiName: wastedOn
+    displayName: 폐기일
+    type: date
+    required: true
+    indexed: true
+  batchRid:
+    apiName: batchRid
+    displayName: 배치
+    type: objectRef
+    objectType: Batch
+    required: true
+    indexed: true
+  quantity:
+    apiName: quantity
+    displayName: 폐기수량(병)
+    type: integer
+    required: true
+    min: 1
+  reason:
+    apiName: reason
+    displayName: 사유
+    type: enum
+    values: [quality, expiry, damage, other]
+    required: true
+    indexed: true

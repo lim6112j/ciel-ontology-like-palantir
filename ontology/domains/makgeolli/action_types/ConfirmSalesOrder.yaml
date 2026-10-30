@@ -1,0 +1,18 @@
+apiName: ConfirmSalesOrder
+displayName: 판매주문 확정
+description: 작성 중인 판매주문을 확정한다.
+agentProposable: true
+allowedRoles: [manager, agent]
+parameters:
+  order:
+    apiName: order
+    type: objectRef
+    objectType: SalesOrder
+    displayName: 주문
+rules:
+  - type: modifyObject
+    target: {param: order, objectType: SalesOrder}
+    expectedStatus: [draft]
+    properties:
+      - property: status
+        value: confirmed

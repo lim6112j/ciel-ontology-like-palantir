@@ -1,0 +1,17 @@
+functions:
+  - apiName: wasteHistory
+    displayName: 폐기 이력
+    description: 기간·제품별 폐기 기록을 사유별 집계와 함께 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.waste.waste_history
+    parameters:
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: false
+      withinDays:
+        apiName: withinDays
+        type: integer
+        required: false

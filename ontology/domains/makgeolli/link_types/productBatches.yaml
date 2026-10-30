@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: productBatches
+    displayName: 양조배치
+    fromObjectType: Product
+    fromApiName: batches
+    fromCardinality: many
+    toObjectType: Batch
+    toApiName: product
+    toCardinality: one

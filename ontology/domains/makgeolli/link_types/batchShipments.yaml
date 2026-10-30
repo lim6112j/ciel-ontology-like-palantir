@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: batchShipments
+    displayName: 출하
+    fromObjectType: Batch
+    fromApiName: shipments
+    fromCardinality: many
+    toObjectType: Shipment
+    toApiName: batch
+    toCardinality: one

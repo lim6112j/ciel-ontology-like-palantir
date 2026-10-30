@@ -1,0 +1,9 @@
+linkTypes:
+  - apiName: batchWaste
+    displayName: 폐기기록
+    fromObjectType: Batch
+    fromApiName: wasteRecords
+    fromCardinality: many
+    toObjectType: WasteRecord
+    toApiName: batch
+    toCardinality: one

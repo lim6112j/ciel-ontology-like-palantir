@@ -1,0 +1,103 @@
+apiName: Product
+displayName: 제품
+pluralDisplayName: 제품
+description: 막걸리 양조장 SKU. 유통기한(≤30일)과 발효·숙성일수, 권장 온도 범위를 제품 속성으로 둔다.
+primaryKey: sku
+properties:
+  sku:
+    apiName: sku
+    displayName: SKU
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 제품명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  category:
+    apiName: category
+    displayName: 분류
+    type: enum
+    values: [생막걸리, 탁주, 청주, 스파클링, 과실주]
+    required: true
+    indexed: true
+  alcoholPercent:
+    apiName: alcoholPercent
+    displayName: 도수(%)
+    type: decimal
+    required: true
+    min: 0
+    max: 20
+  shelfLifeDays:
+    apiName: shelfLifeDays
+    displayName: 유통기한(일)
+    type: integer
+    required: true
+    min: 1
+    max: 30
+  fermentationDays:
+    apiName: fermentationDays
+    displayName: 발효일수
+    type: integer
+    required: true
+    min: 1
+  agingDays:
+    apiName: agingDays
+    displayName: 숙성일수
+    type: integer
+    required: true
+    min: 0
+  fermentationTempMinC:
+    apiName: fermentationTempMinC
+    displayName: 발효권장최저온도(°C)
+    type: decimal
+    required: true
+    min: -5
+    max: 40
+  fermentationTempMaxC:
+    apiName: fermentationTempMaxC
+    displayName: 발효권장최고온도(°C)
+    type: decimal
+    required: true
+    min: -5
+    max: 40
+  agingTempMinC:
+    apiName: agingTempMinC
+    displayName: 숙성권장최저온도(°C)
+    type: decimal
+    required: true
+    min: -5
+    max: 40
+  agingTempMaxC:
+    apiName: agingTempMaxC
+    displayName: 숙성권장최고온도(°C)
+    type: decimal
+    required: true
+    min: -5
+    max: 40
+  volumeMl:
+    apiName: volumeMl
+    displayName: 용량(ml)
+    type: integer
+    required: true
+    min: 100
+  unitPrice:
+    apiName: unitPrice
+    displayName: 단가(원)
+    type: integer
+    required: true
+    min: 0
+  active:
+    apiName: active
+    displayName: 판매중
+    type: boolean
+    required: true
+    indexed: true
+    defaultValue: true
+indexes:
+  - name: ix_makgeolli_product_category
+    properties: [category]

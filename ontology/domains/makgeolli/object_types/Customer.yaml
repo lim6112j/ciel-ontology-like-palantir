@@ -1,0 +1,50 @@
+apiName: Customer
+displayName: 판매처
+pluralDisplayName: 판매처
+description: 막걸리를 납품하는 유흥주점·편의점·마트·온라인 판매처.
+primaryKey: customerNo
+properties:
+  customerNo:
+    apiName: customerNo
+    displayName: 판매처번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 명칭
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  type:
+    apiName: type
+    displayName: 유형
+    type: enum
+    values: [유흥주점, 편의점, 대형마트, 온라인, 직영점]
+    required: true
+    indexed: true
+  region:
+    apiName: region
+    displayName: 지역
+    type: string
+    maxLength: 60
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [active, suspended]
+    required: true
+    indexed: true
+    defaultValue: active
+  openedOn:
+    apiName: openedOn
+    displayName: 거래시작일
+    type: date
+stateMachine:
+  property: status
+  initial: active
+  transitions:
+    - {from: active, to: suspended}
+    - {from: suspended, to: active}

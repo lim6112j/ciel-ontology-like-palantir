@@ -1,0 +1,18 @@
+functions:
+  - apiName: outletStock
+    displayName: 판매처 재고
+    description: 판매처별 제품 재고를 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.stock.outlet_stock
+    parameters:
+      customer:
+        apiName: customer
+        type: objectRef
+        objectType: Customer
+        required: true
+      product:
+        apiName: product
+        type: objectRef
+        objectType: Product
+        required: false

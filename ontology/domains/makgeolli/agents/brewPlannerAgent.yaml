@@ -1,0 +1,22 @@
+apiName: brewPlannerAgent
+displayName: 양조 계획 에이전트
+description: 발효·숙성 진행과 온도 이탈을 확인해 완료·조치·폐기·재양조를 제안한다.
+kind: dispatch
+systemPromptFile: prompts/brew_planner.md
+temperature: 0.1
+maxTurns: 12
+maxTokens: 4096
+maxProposals: 3
+maxPageSize: 10
+allowedActionTypes:
+  - CreateBatch
+  - CompleteFermentation
+  - CompleteAging
+  - WasteBatch
+  - AdjustBatchTemp
+allowedFunctions:
+  - productionPipeline
+  - tempDeviations
+  - expiringBatches
+  - warehouseStock
+  - reorderSuggestions

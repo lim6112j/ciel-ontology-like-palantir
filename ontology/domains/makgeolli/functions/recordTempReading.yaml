@@ -1,0 +1,24 @@
+functions:
+  - apiName: recordTempReading
+    displayName: 온도 측정 기록
+    description: 배치의 발효·숙성 온도를 기록하고 목표범위 대비 허용여부를 판정한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.temp.record_temp_reading
+    parameters:
+      batch:
+        apiName: batch
+        type: objectRef
+        objectType: Batch
+        required: true
+      tempC:
+        apiName: tempC
+        type: decimal
+        required: true
+      stage:
+        apiName: stage
+        type: string
+        required: true
+      recordedAt:
+        apiName: recordedAt
+        type: string
+        required: false

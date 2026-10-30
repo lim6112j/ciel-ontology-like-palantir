@@ -1,0 +1,63 @@
+functions:
+  - apiName: upsertProduct
+    displayName: 제품 등록/수정
+    description: SKU로 제품을 신규 등록하거나 기존 제품 정보를 갱신한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.master_data.upsert_product
+    parameters:
+      sku:
+        apiName: sku
+        type: string
+        required: true
+      name:
+        apiName: name
+        type: string
+        required: true
+      category:
+        apiName: category
+        type: string
+        required: true
+      alcoholPercent:
+        apiName: alcoholPercent
+        type: decimal
+        required: true
+      shelfLifeDays:
+        apiName: shelfLifeDays
+        type: integer
+        required: true
+      fermentationDays:
+        apiName: fermentationDays
+        type: integer
+        required: true
+      agingDays:
+        apiName: agingDays
+        type: integer
+        required: true
+      fermentationTempMinC:
+        apiName: fermentationTempMinC
+        type: decimal
+        required: true
+      fermentationTempMaxC:
+        apiName: fermentationTempMaxC
+        type: decimal
+        required: true
+      agingTempMinC:
+        apiName: agingTempMinC
+        type: decimal
+        required: true
+      agingTempMaxC:
+        apiName: agingTempMaxC
+        type: decimal
+        required: true
+      volumeMl:
+        apiName: volumeMl
+        type: integer
+        required: true
+      unitPrice:
+        apiName: unitPrice
+        type: integer
+        required: true
+      active:
+        apiName: active
+        type: boolean
+        required: false

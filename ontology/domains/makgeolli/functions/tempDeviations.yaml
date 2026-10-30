@@ -1,0 +1,12 @@
+functions:
+  - apiName: tempDeviations
+    displayName: 온도 이탈 배치
+    description: 최근 측정에서 목표온도 범위를 벗어난 배치 목록을 반환한다.
+    kind: read
+    agentCallable: true
+    implementation: ontology_runtime.domains.makgeolli.functions.read.production.temp_deviations
+    parameters:
+      withinDays:
+        apiName: withinDays
+        type: integer
+        required: false

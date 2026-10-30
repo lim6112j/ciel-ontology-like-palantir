@@ -1,0 +1,16 @@
+functions:
+  - apiName: adjustWarehouseStock
+    displayName: 창고 재고 조정
+    description: 재고 실사 차이 등으로 창고 재고를 수동 조정한다.
+    kind: write
+    implementation: ontology_runtime.domains.makgeolli.functions.write.inventory.adjust_warehouse_stock
+    parameters:
+      stock:
+        apiName: stock
+        type: objectRef
+        objectType: WarehouseStock
+        required: true
+      delta:
+        apiName: delta
+        type: integer
+        required: true
