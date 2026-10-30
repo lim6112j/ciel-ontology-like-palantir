@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
+import { Markdown } from '../components/Markdown';
 import type { AgentSummary, DomainApi, Envelope } from './api';
 
 interface Turn {
@@ -149,7 +150,7 @@ export function AgentChat({ api, domainName, presets }: Props) {
               )}
               {turns.map((turn, index) => (
                 <div key={index} className={`bubble ${turn.role === 'user' ? 'user' : ''}`}>
-                  {turn.text}
+                  {turn.role === 'assistant' ? <Markdown text={turn.text} /> : turn.text}
                   {turn.proposals && turn.proposals.length > 0 && (
                     <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>
                       → 제안 인박스에 {turn.proposals.length}건 등록됨
