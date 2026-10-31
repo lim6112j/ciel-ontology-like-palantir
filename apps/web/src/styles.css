@@ -253,3 +253,4 @@ button.danger { background: transparent; border-color: rgba(224, 92, 92, 0.5); c
 }
 .markdown a { color: var(--accent); text-decoration: underline; }
 .markdown hr { border: none; border-top: 1px solid var(--border); margin: 0.6em 0; }
+.chat-toolbar { display: flex; justify-content: flex-end; margin-bottom: 6px; }

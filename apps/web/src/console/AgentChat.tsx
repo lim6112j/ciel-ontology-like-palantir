@@ -12,6 +12,41 @@ interface Turn {
   runNo?: string;
 }
 
+/** Kept in sessionStorage so the log survives tab switches and reloads. */
+const MAX_SAVED_TURNS = 50;
+
+function storageKey(domainName: string): string {
+  return `ontology-chat:${domainName}`;
+}
+
+/** Parse stored turns, discarding anything that does not look like a turn. */
+function loadTurns(domainName: string): Turn[] {
+  const raw = sessionStorage.getItem(storageKey(domainName));
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (entry): entry is Turn =>
+        entry !== null &&
+        typeof entry === 'object' &&
+        (entry as Turn).role in { user: true, assistant: true } &&
+        typeof (entry as Turn).text === 'string',
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveTurns(domainName: string, turns: Turn[]): void {
+  try {
+    const capped = turns.slice(-MAX_SAVED_TURNS);
+    sessionStorage.setItem(storageKey(domainName), JSON.stringify(capped));
+  } catch {
+    // Quota or serialization failure must never break the chat itself.
+  }
+}
+
 export interface AgentPreset {
   text: string;
   agent: string;
@@ -43,7 +78,11 @@ export function AgentChat({ api, domainName, presets }: Props) {
 
   const [agent, setAgent] = useState('');
   const [input, setInput] = useState('');
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [turns, setTurns] = useState<Turn[]>(() => loadTurns(domainName));
+
+  useEffect(() => {
+    saveTurns(domainName, turns);
+  }, [domainName, turns]);
 
   useEffect(() => {
     if (agents.length > 0 && !agents.some((entry) => entry.apiName === agent)) {
@@ -140,6 +179,17 @@ export function AgentChat({ api, domainName, presets }: Props) {
           </div>
 
           <div className="chat">
+            {turns.length > 0 && (
+              <div className="chat-toolbar">
+                <button
+                  className="ghost"
+                  onClick={() => setTurns([])}
+                  disabled={invoke.isPending}
+                >
+                  대화 지우기
+                </button>
+              </div>
+            )}
             <div className="chat-log">
               {turns.length === 0 && (
                 <div className="empty">
