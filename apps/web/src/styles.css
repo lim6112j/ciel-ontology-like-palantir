@@ -254,3 +254,69 @@ button.danger { background: transparent; border-color: rgba(224, 92, 92, 0.5); c
 .markdown a { color: var(--accent); text-decoration: underline; }
 .markdown hr { border: none; border-top: 1px solid var(--border); margin: 0.6em 0; }
 .chat-toolbar { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+
+/* Ontology diagram dialog */
+.diagram-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 12, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 40;
+}
+.diagram-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: min(1180px, 100%);
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+}
+.diagram-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.diagram-head h2 { margin: 0; font-size: 17px; }
+.diagram-head p { margin: 4px 0 0; font-size: 12.5px; }
+.diagram-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.diagram-canvas {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 12px;
+  text-align: center;
+}
+.diagram-canvas svg { max-width: 100%; height: auto; }
+.diagram-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.diagram-legend .legend-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.diagram-legend .swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.diagram-legend .swatch.object { background: #1b2029; border: 1px solid #3a4252; }
+.diagram-legend .swatch.action { background: #3a2f16; border: 1px solid #e0a63c; }

@@ -6,3 +6,4 @@ export * from "./actions";
 export * from "./links";
 export * from "./agents";
 export * from "./client";
+export * from "./diagram";

@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { DOMAIN_BY_NAME, DOMAIN_DIAGRAMS, DOMAIN_DIAGRAM_COUNTS } from '../generated/domains';
 import type { ActionTypeSummary, AgentSummary, DomainApi, Envelope, ObjectTypeSummary } from './api';
+import { OntologyDiagram } from './OntologyDiagram';
 
 interface Props {
   api: DomainApi;
@@ -12,6 +14,7 @@ type Tab = 'objects' | 'actions' | 'agents';
 
 export function SchemaBrowser({ api, domainName }: Props) {
   const [tab, setTab] = useState<Tab>('objects');
+  const [diagramOpen, setDiagramOpen] = useState(false);
 
   const objects = useQuery({ queryKey: [domainName, 'ontology-objects'], queryFn: () => api.objectTypes() });
   const actions = useQuery({ queryKey: [domainName, 'ontology-actions'], queryFn: () => api.actionTypes() });
@@ -28,6 +31,9 @@ export function SchemaBrowser({ api, domainName }: Props) {
           <h1>스키마 브라우저</h1>
           <p>런타임이 실제로 사용하는 온톨로지 정의입니다. YAML이 단일 소스입니다.</p>
         </div>
+        <button className="primary" onClick={() => setDiagramOpen(true)}>
+          다이어그램 보기
+        </button>
       </div>
 
       <div className="tabs">
@@ -157,6 +163,22 @@ export function SchemaBrowser({ api, domainName }: Props) {
           ))}
         </div>
       )}
+
+      <OntologyDiagram
+        open={diagramOpen}
+        domainName={domainName}
+        displayName={DOMAIN_BY_NAME[domainName]?.displayName ?? domainName}
+        source={DOMAIN_DIAGRAMS[domainName] ?? ''}
+        counts={
+          DOMAIN_DIAGRAM_COUNTS[domainName] ?? {
+            objectTypes: 0,
+            linkTypes: 0,
+            actionTypes: 0,
+            agentProposableActions: 0,
+          }
+        }
+        onClose={() => setDiagramOpen(false)}
+      />
     </>
   );
 }

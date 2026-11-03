@@ -48,11 +48,24 @@ def render_domains_ts(entries: list[dict[str, Any]]) -> str:
         f'import {{ api as {entry["apiName"]}Api }} from "./{entry["apiName"]}/client";\n'
         for entry in entries
     )
+    diagram_imports = "".join(
+        f"import {{ DIAGRAM_MERMAID as {entry['apiName']}Diagram, "
+        f"DIAGRAM_COUNTS as {entry['apiName']}DiagramCounts }} "
+        f'from "./{entry["apiName"]}/diagram";\n'
+        for entry in entries
+    )
     body = json.dumps(entries, ensure_ascii=False, indent=2)
     api_map = "".join(f"  {entry['apiName']}: {entry['apiName']}Api,\n" for entry in entries)
+    diagram_map = "".join(
+        f"  {entry['apiName']}: {entry['apiName']}Diagram,\n" for entry in entries
+    )
+    counts_map = "".join(
+        f"  {entry['apiName']}: {entry['apiName']}DiagramCounts,\n" for entry in entries
+    )
     return (
         _HEADER
         + imports
+        + diagram_imports
         + "\nexport interface DomainEntry {\n"
         "  apiName: string;\n"
         "  displayName: string;\n"
@@ -67,6 +80,19 @@ def render_domains_ts(entries: list[dict[str, Any]]) -> str:
         "export const DOMAIN_APIS = {\n"
         f"  {api_map}".rstrip()
         + "\n} as const;\n"
+        "\nexport interface DiagramCounts {\n"
+        "  objectTypes: number;\n"
+        "  linkTypes: number;\n"
+        "  actionTypes: number;\n"
+        "  agentProposableActions: number;\n"
+        "}\n\n"
+        "/** Mermaid erDiagram source per domain, generated from that domain's YAML. */\n"
+        "export const DOMAIN_DIAGRAMS: Record<string, string> = {\n"
+        f"  {diagram_map}".rstrip()
+        + "\n};\n\n"
+        "export const DOMAIN_DIAGRAM_COUNTS: Record<string, DiagramCounts> = {\n"
+        f"  {counts_map}".rstrip()
+        + "\n};\n"
         "\nexport const DOMAIN_BY_NAME: Record<string, DomainEntry> = Object.fromEntries(\n"
         "  DOMAINS.map((domain) => [domain.apiName, domain]),\n"
         ");\n"

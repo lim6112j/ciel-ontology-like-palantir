@@ -7,8 +7,10 @@ from pathlib import Path
 import pytest
 
 from ontology_runtime.clientgen.generator import (
+    _action_touchpoints,
     generate_actions,
     generate_client,
+    generate_diagram,
     generate_link_map,
     generate_types,
     render_ontology_markdown,
@@ -57,10 +59,81 @@ def test_client_exposes_guardrailed_surface() -> None:
     assert "agentApply" not in output
 
 
+def test_diagram_is_an_er_diagram(registry: SchemaRegistry) -> None:
+    output = generate_diagram(registry)
+    assert output.startswith("erDiagram")
+    # Every object type becomes an entity, and every link type exactly one edge.
+    for name in registry.bundle.object_types:
+        assert f"\n    {name} {{" in output
+    for link in registry.bundle.link_types.values():
+        assert f'"{link.source_link_name()}"' in output
+
+
+def test_diagram_edges_carry_cardinality_and_link_name(registry: SchemaRegistry) -> None:
+    output = generate_diagram(registry)
+    # deliveryStops: one delivery has many stops, a stop belongs to one delivery.
+    assert 'Delivery ||--o{ DeliveryStop : "stops"' in output
+    # One edge per link type, not one per derived direction.
+    assert output.count("Delivery ||--o{ DeliveryStop") == 1
+    # The inverse direction is not emitted as a second edge.
+    assert 'DeliveryStop ||--o{ Delivery : "delivery"' not in output
+
+
+def test_diagram_marks_primary_and_unique_keys(registry: SchemaRegistry) -> None:
+    output = generate_diagram(registry)
+    order_block = output.split("\n    SalesOrder {", 1)[1].split("\n    }", 1)[0]
+    assert "string orderNo PK" in order_block
+    assert "objectRef outletRid FK" in order_block
+
+
+def test_diagram_connects_actions_to_the_objects_they_touch(registry: SchemaRegistry) -> None:
+    output = generate_diagram(registry)
+    # Function-backed actions are wired through the function's own parameters.
+    assert 'PlanDeliveries ||..o{ Depot : "uses"' in output
+    # Declarative actions show their create/modify targets.
+    assert 'ConfirmSalesOrder ||..o{ SalesOrder : "modifies"' in output
+    # Actions are not entities with properties.
+    assert "\n    ConfirmSalesOrder {" not in output
+
+
+def test_diagram_colors_actions_differently_from_objects(registry: SchemaRegistry) -> None:
+    output = generate_diagram(registry)
+    # Objects wear the console's slate tones, actions the amber accent.
+    assert "style SalesOrder fill:#1b2029,stroke:#3a4252,color:#e6e9ef" in output
+    assert "style ConfirmSalesOrder fill:#3a2f16,stroke:#e0a63c,color:#f2cf8a" in output
+    # Only actions that touch an object are drawn, so only they get a style line.
+    for action in registry.bundle.action_types.values():
+        touchpoints = _action_touchpoints(registry, action)
+        styled = f"style {action.apiName} fill:" in output
+        assert styled == bool(touchpoints), action.apiName
+
+
+def test_diagram_labels_are_quote_safe(registry: SchemaRegistry) -> None:
+    output = generate_diagram(registry)
+    for line in output.splitlines():
+        if "--" in line and ":" in line:
+            label = line.rsplit(":", 1)[1].strip()
+            assert label.startswith('"') and label.endswith('"'), line
+            # Mermaid labels are single-quoted strings here: no nested quotes/backslashes.
+            assert "\\" not in label
+
+
 def test_write_client_creates_expected_files(registry: SchemaRegistry, tmp_path: Path) -> None:
     written = write_client(registry, tmp_path / "generated")
     names = {path.name for path in written}
-    assert names == {"objects.ts", "actions.ts", "links.ts", "agents.ts", "client.ts", "index.ts"}
+    assert names == {
+        "objects.ts",
+        "actions.ts",
+        "links.ts",
+        "agents.ts",
+        "client.ts",
+        "index.ts",
+        "diagram.ts",
+    }
+    diagram = (tmp_path / "generated" / "diagram.ts").read_text(encoding="utf-8")
+    assert "export const DIAGRAM_MERMAID" in diagram
+    assert "export const DIAGRAM_COUNTS" in diagram
+    assert diagram.startswith("// GENERATED FILE")
     assert all(path.stat().st_size > 0 for path in written)
 
     # Stable across runs: generation is deterministic except the dated VERSION.

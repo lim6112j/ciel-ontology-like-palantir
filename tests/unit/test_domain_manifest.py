@@ -69,3 +69,9 @@ def test_rendered_manifest_is_valid_json_and_typescript() -> None:
     assert 'import { api as liquorApi } from "./liquor/client";' in ts
     assert "export const DOMAIN_APIS = {" in ts
     assert "liquor: liquorApi," in ts
+    # Every domain's Mermaid diagram is importable from the landing manifest.
+    assert "DIAGRAM_MERMAID as liquorDiagram" in ts
+    assert "export const DOMAIN_DIAGRAMS" in ts
+    assert "liquor: liquorDiagram," in ts
+    assert "export const DOMAIN_DIAGRAM_COUNTS" in ts
+    assert "liquor: liquorDiagramCounts," in ts

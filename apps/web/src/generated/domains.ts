@@ -3,6 +3,9 @@
 import { api as liquorApi } from "./liquor/client";
 import { api as bakeryApi } from "./bakery/client";
 import { api as makgeolliApi } from "./makgeolli/client";
+import { DIAGRAM_MERMAID as liquorDiagram, DIAGRAM_COUNTS as liquorDiagramCounts } from "./liquor/diagram";
+import { DIAGRAM_MERMAID as bakeryDiagram, DIAGRAM_COUNTS as bakeryDiagramCounts } from "./bakery/diagram";
+import { DIAGRAM_MERMAID as makgeolliDiagram, DIAGRAM_COUNTS as makgeolliDiagramCounts } from "./makgeolli/diagram";
 
 export interface DomainEntry {
   apiName: string;
@@ -51,6 +54,26 @@ export const DOMAIN_APIS = {
   bakery: bakeryApi,
   makgeolli: makgeolliApi,
 } as const;
+
+export interface DiagramCounts {
+  objectTypes: number;
+  linkTypes: number;
+  actionTypes: number;
+  agentProposableActions: number;
+}
+
+/** Mermaid erDiagram source per domain, generated from that domain's YAML. */
+export const DOMAIN_DIAGRAMS: Record<string, string> = {
+    liquor: liquorDiagram,
+  bakery: bakeryDiagram,
+  makgeolli: makgeolliDiagram,
+};
+
+export const DOMAIN_DIAGRAM_COUNTS: Record<string, DiagramCounts> = {
+    liquor: liquorDiagramCounts,
+  bakery: bakeryDiagramCounts,
+  makgeolli: makgeolliDiagramCounts,
+};
 
 export const DOMAIN_BY_NAME: Record<string, DomainEntry> = Object.fromEntries(
   DOMAINS.map((domain) => [domain.apiName, domain]),
