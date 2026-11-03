@@ -38,6 +38,12 @@ properties:
     values: [fermentation, aging]
     required: true
     indexed: true
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
   inRange:
     apiName: inRange
     displayName: 범위내

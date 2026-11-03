@@ -8,6 +8,7 @@ from typing import Any
 from ontology_runtime.actions.context import EditContext
 from ontology_runtime.domains.makgeolli.functions.write.common import (
     as_date,
+    assign_owning_team,
     bump_outlet_stock,
     bump_warehouse_stock,
     invalid,
@@ -72,6 +73,7 @@ async def ship_batch(context: EditContext, params: dict[str, Any]) -> None:
     shipment_rid = context.create("Shipment", shipment_properties)
     context.link("batchShipments", batch.rid, shipment_rid)
     context.link("customerShipments", customer.rid, shipment_rid)
+    await assign_owning_team(context, shipment_rid)
     if order is not None:
         context.link("orderShipments", order.rid, shipment_rid)
         if order.properties.get("status") == "confirmed":

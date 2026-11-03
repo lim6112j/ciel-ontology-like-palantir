@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamCustomers
+    displayName: 담당판매처
+    description: 영업팀이 관리하는 판매처.
+    fromObjectType: Team
+    fromApiName: customers
+    fromCardinality: many
+    toObjectType: Customer
+    toApiName: team
+    toCardinality: one

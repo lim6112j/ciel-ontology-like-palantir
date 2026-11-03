@@ -10,6 +10,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ontology_runtime.domains.makgeolli.functions.write.common import TEAM_OWNERSHIP
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.store.object_store import ObjectStore
 
@@ -64,11 +65,22 @@ MATERIALS = [
     ("설탕", "kg", 1900, 120.0, 60.0, "설탕공사"),
 ]
 
+#: The brewery's work teams: (name, 업무구분).
+TEAMS = [
+    ("양조팀", "양조"),
+    ("품질관리팀", "품질"),
+    ("포장팀", "포장"),
+    ("물류팀", "물류"),
+    ("영업팀", "영업"),
+    ("자재관리팀", "자재"),
+]
+
 
 @dataclass
 class SeedSummary:
     products: int = 0
     customers: int = 0
+    teams: int = 0
     tanks: int = 0
     materials: int = 0
     batches: int = 0
@@ -85,6 +97,7 @@ class SeedSummary:
         return {
             "products": self.products,
             "customers": self.customers,
+            "teams": self.teams,
             "tanks": self.tanks,
             "materials": self.materials,
             "batches": self.batches,
@@ -113,6 +126,7 @@ class SeedGenerator:
         self.random = random.Random(seed)
         self.today = today or dt.date.today()
         self.summary = SeedSummary()
+        self._teams_by_kind: dict[str, Any] = {}
 
     async def reset(self) -> None:
         await self.session.execute(
@@ -123,6 +137,7 @@ class SeedGenerator:
         )
 
     async def run(self) -> SeedSummary:
+        await self._teams()
         products = await self._products()
         customers = await self._customers()
         tanks = await self._tanks()
@@ -135,6 +150,33 @@ class SeedGenerator:
         self.summary.orders = len(orders)
         self.summary.order_lines = line_count
         return self.summary
+
+    async def _teams(self) -> list[Any]:
+        """The brewery's work teams; every owned object links back to one of them."""
+        created = []
+        for index, (name, kind) in enumerate(TEAMS, start=1):
+            created.append(
+                await self.store.create(
+                    "Team",
+                    {
+                        "teamNo": f"T{index:02d}",
+                        "name": name,
+                        "kind": kind,
+                        "status": "active",
+                        "since": (self.today - dt.timedelta(days=365 * index)).isoformat(),
+                    },
+                )
+            )
+        self._teams_by_kind = {team.properties["kind"]: team for team in created}
+        self.summary.teams = len(created)
+        return created
+
+    async def _assign_team(self, obj: Any) -> None:
+        """Stamp the owning team on an object and create the ownership link."""
+        link_type, kind = TEAM_OWNERSHIP[obj.object_type]
+        team = self._teams_by_kind[kind]
+        await self.store.update(obj.rid, {"teamRid": team.rid})
+        await self._links().create(link_type, team.rid, obj.rid)
 
     async def _products(self) -> list[Any]:
         created = []
@@ -188,7 +230,9 @@ class SeedGenerator:
             }
             if region:
                 properties["region"] = region
-            created.append(await self.store.create("Customer", properties))
+            customer = await self.store.create("Customer", properties)
+            await self._assign_team(customer)
+            created.append(customer)
         self.summary.customers = len(created)
         return created
 
@@ -199,21 +243,21 @@ class SeedGenerator:
         ):
             # "aging_use" is not a status enum value; map it to in_use for the aging tank.
             mapped_status = "in_use" if status == "aging_use" else status
-            created.append(
-                await self.store.create(
-                    "Tank",
-                    {
-                        "tankNo": f"T{index:02d}",
-                        "name": name,
-                        "capacityL": capacity,
-                        "kind": kind,
-                        "tempControl": temp_control,
-                        "tempMinC": t_min,
-                        "tempMaxC": t_max,
-                        "status": mapped_status,
-                    },
-                )
+            tank = await self.store.create(
+                "Tank",
+                {
+                    "tankNo": f"T{index:02d}",
+                    "name": name,
+                    "capacityL": capacity,
+                    "kind": kind,
+                    "tempControl": temp_control,
+                    "tempMinC": t_min,
+                    "tempMaxC": t_max,
+                    "status": mapped_status,
+                },
             )
+            await self._assign_team(tank)
+            created.append(tank)
         self.summary.tanks = len(created)
         return created
 
@@ -222,20 +266,20 @@ class SeedGenerator:
         for index, (name, unit, unit_cost, stock, reorder_point, supplier) in enumerate(
             MATERIALS, start=1
         ):
-            created.append(
-                await self.store.create(
-                    "RawMaterial",
-                    {
-                        "materialNo": f"RM{index:03d}",
-                        "name": name,
-                        "unit": unit,
-                        "unitCost": unit_cost,
-                        "currentStock": stock,
-                        "reorderPoint": reorder_point,
-                        "supplier": supplier,
-                    },
-                )
+            material = await self.store.create(
+                "RawMaterial",
+                {
+                    "materialNo": f"RM{index:03d}",
+                    "name": name,
+                    "unit": unit,
+                    "unitCost": unit_cost,
+                    "currentStock": stock,
+                    "reorderPoint": reorder_point,
+                    "supplier": supplier,
+                },
             )
+            await self._assign_team(material)
+            created.append(material)
         self.summary.materials = len(created)
         return created
 
@@ -336,6 +380,7 @@ class SeedGenerator:
             if status in {"fermenting", "aging"}:
                 await links.create("tankBatches", tank.rid, batch.rid)
                 await self.store.update(batch.rid, {"tankRid": tank.rid})
+            await self._assign_team(batch)
 
             created.append(
                 {
@@ -385,6 +430,7 @@ class SeedGenerator:
                 },
             )
             await links.create("batchTempReadings", obj.rid, reading.rid)
+            await self._assign_team(reading)
             reading_index += 1
         self.summary.temp_readings = reading_index
 
@@ -416,6 +462,7 @@ class SeedGenerator:
                 },
             )
             await links.create("customerOrders", customer.rid, order.rid)
+            await self._assign_team(order)
             total = 0
             line_products = self.random.sample(products, k=min(3, len(products)))
             for line_index, product in enumerate(line_products, start=1):
@@ -469,6 +516,7 @@ class SeedGenerator:
             )
             await links.create("batchShipments", batch.rid, shipment.rid)
             await links.create("customerShipments", customer.rid, shipment.rid)
+            await self._assign_team(shipment)
             if index < len(IN_TRANSIT_STATUSES) and index < len(orders):
                 order = orders[index]
                 await links.create("orderShipments", order.rid, shipment.rid)
@@ -502,6 +550,7 @@ class SeedGenerator:
             )
             await links.create("batchWarehouseStock", batch.rid, stock.rid)
             await links.create("productWarehouseStock", entry["productRid"], stock.rid)
+            await self._assign_team(stock)
             warehouse_index += 1
         self.summary.warehouse_stocks = warehouse_index
 
@@ -541,6 +590,7 @@ class SeedGenerator:
             },
         )
         await links.create("batchWaste", batch.rid, record.rid)
+        await self._assign_team(record)
         self.summary.waste_records = 1
 
     def _links(self) -> Any:

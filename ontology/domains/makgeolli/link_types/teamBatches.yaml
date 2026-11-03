@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamBatches
+    displayName: 담당배치
+    description: 양조팀이 담당하는 배치. 배치 하나는 팀 하나만 담당한다.
+    fromObjectType: Team
+    fromApiName: batches
+    fromCardinality: many
+    toObjectType: Batch
+    toApiName: team
+    toCardinality: one

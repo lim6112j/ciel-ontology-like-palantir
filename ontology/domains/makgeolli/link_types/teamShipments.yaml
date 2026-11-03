@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamShipments
+    displayName: 담당출하
+    description: 물류팀이 수행한 출하.
+    fromObjectType: Team
+    fromApiName: shipments
+    fromCardinality: many
+    toObjectType: Shipment
+    toApiName: team
+    toCardinality: one

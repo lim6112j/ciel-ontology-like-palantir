@@ -8,6 +8,7 @@ from typing import Any
 from ontology_runtime.actions.context import EditContext
 from ontology_runtime.domains.makgeolli.functions.write.common import (
     as_date,
+    assign_owning_team,
     invalid,
     next_no,
 )
@@ -74,5 +75,6 @@ async def create_sales_order(context: EditContext, params: dict[str, Any]) -> No
         context.link("lineProduct", product.rid, line_rid)
 
     await context.modify(order_rid, {"totalAmount": total})
+    await assign_owning_team(context, order_rid)
     context.scratch["orderId"] = order_rid
     context.scratch["totalAmount"] = total

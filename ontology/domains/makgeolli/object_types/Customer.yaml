@@ -42,6 +42,12 @@ properties:
     apiName: openedOn
     displayName: 거래시작일
     type: date
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
 stateMachine:
   property: status
   initial: active

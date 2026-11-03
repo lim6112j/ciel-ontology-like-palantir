@@ -8,6 +8,7 @@ from typing import Any
 from ontology_runtime.actions.context import EditContext
 from ontology_runtime.domains.makgeolli.functions.write.common import (
     as_date,
+    assign_owning_team,
     bump_warehouse_stock,
     invalid,
     next_no,
@@ -140,6 +141,7 @@ async def create_batch(context: EditContext, params: dict[str, Any]) -> None:
         await context.modify(tank.rid, {"status": "in_use"})
 
     await _link_materials(context, batch_rid, params.get("materials") or [])
+    await assign_owning_team(context, batch_rid)
     context.scratch["batchId"] = batch_rid
 
 
@@ -219,6 +221,7 @@ async def waste_batch(context: EditContext, params: dict[str, Any]) -> None:
         },
     )
     context.link("batchWaste", batch.rid, record_rid)
+    await assign_owning_team(context, record_rid)
 
     if bottled_qty:
         await bump_warehouse_stock(context, batch, -quantity, wasted_on)

@@ -42,6 +42,12 @@ properties:
     apiName: note
     displayName: 비고
     type: text
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
 stateMachine:
   property: status
   initial: draft

@@ -7,6 +7,7 @@ from typing import Any
 
 from ontology_runtime.actions.context import EditContext
 from ontology_runtime.domains.makgeolli.functions.write.common import (
+    assign_owning_team,
     invalid,
     next_no,
 )
@@ -67,6 +68,7 @@ async def record_temp_reading(context: EditContext, params: dict[str, Any]) -> N
         },
     )
     context.link("batchTempReadings", batch.rid, reading_rid)
+    await assign_owning_team(context, reading_rid)
     context.scratch["readingId"] = reading_rid
     context.scratch["inRange"] = in_range
 

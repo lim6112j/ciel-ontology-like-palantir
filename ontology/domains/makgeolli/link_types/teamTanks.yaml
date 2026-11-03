@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamTanks
+    displayName: 담당탱크
+    description: 양조팀이 운영하는 발효·숙성 탱크.
+    fromObjectType: Team
+    fromApiName: tanks
+    fromCardinality: many
+    toObjectType: Tank
+    toApiName: team
+    toCardinality: one

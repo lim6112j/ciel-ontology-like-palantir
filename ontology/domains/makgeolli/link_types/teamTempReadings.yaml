@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamTempReadings
+    displayName: 담당온도측정
+    description: 품질관리팀이 기록·판정한 온도 측정.
+    fromObjectType: Team
+    fromApiName: tempReadings
+    fromCardinality: many
+    toObjectType: TempReading
+    toApiName: team
+    toCardinality: one

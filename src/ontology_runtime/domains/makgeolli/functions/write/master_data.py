@@ -1,13 +1,20 @@
-"""Write functions for master data: products and customers."""
+"""Write functions for master data: products, customers and teams."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from ontology_runtime.actions.context import EditContext
-from ontology_runtime.domains.makgeolli.functions.write.common import invalid
+from ontology_runtime.domains.makgeolli.functions.write.common import (
+    as_date,
+    assign_owning_team,
+    invalid,
+)
 
 MAX_SHELF_LIFE_DAYS = 30
+
+#: 업무 팀 구분. Team.kind 와 UpsertTeam 액션의 enum 값과 같다.
+TEAM_KINDS = ("양조", "품질", "포장", "물류", "영업", "자재")
 
 
 async def upsert_product(context: EditContext, params: dict[str, Any]) -> None:
@@ -92,5 +99,37 @@ async def upsert_customer(context: EditContext, params: dict[str, Any]) -> None:
         return
 
     customer_rid = context.create("Customer", {"customerNo": customer_no, **properties})
+    await assign_owning_team(context, customer_rid)
     context.scratch["customerId"] = customer_rid
+    context.scratch["created"] = True
+
+
+async def upsert_team(context: EditContext, params: dict[str, Any]) -> None:
+    team_no = str(params.get("teamNo") or "")
+    if not team_no:
+        raise invalid("teamNo", "팀번호가 필요합니다.")
+    if not params.get("name"):
+        raise invalid("name", "팀명이 필요합니다.")
+    if params.get("kind") not in TEAM_KINDS:
+        raise invalid("kind", "업무구분이 올바르지 않습니다.")
+
+    properties: dict[str, Any] = {
+        "name": params["name"],
+        "kind": params["kind"],
+    }
+    since = as_date(params.get("since"))
+    if since is not None:
+        properties["since"] = since.isoformat()
+
+    existing = [
+        team for team in await context.search("Team") if team.properties.get("teamNo") == team_no
+    ]
+    if existing:
+        await context.modify(existing[0].rid, properties)
+        context.scratch["teamId"] = existing[0].rid
+        context.scratch["created"] = False
+        return
+
+    team_rid = context.create("Team", {"teamNo": team_no, **properties})
+    context.scratch["teamId"] = team_rid
     context.scratch["created"] = True

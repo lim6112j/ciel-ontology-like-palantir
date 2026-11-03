@@ -8,9 +8,49 @@ from typing import Any
 from ontology_runtime.actions.context import EditContext
 from ontology_runtime.errors import ValidationFailed
 
+#: Canonical owning team per object type: (ownership link type, 팀 구분).
+#: A new object is linked to the team that runs that kind of work.
+TEAM_OWNERSHIP: dict[str, tuple[str, str]] = {
+    "Batch": ("teamBatches", "양조"),
+    "Tank": ("teamTanks", "양조"),
+    "TempReading": ("teamTempReadings", "품질"),
+    "WasteRecord": ("teamWaste", "품질"),
+    "WarehouseStock": ("teamWarehouseStock", "포장"),
+    "Shipment": ("teamShipments", "물류"),
+    "SalesOrder": ("teamOrders", "영업"),
+    "Customer": ("teamCustomers", "영업"),
+    "RawMaterial": ("teamMaterials", "자재"),
+}
+
 
 def invalid(path: str, message: str) -> ValidationFailed:
     return ValidationFailed([{"code": "invalid", "path": path, "message": message}])
+
+
+async def assign_owning_team(context: EditContext, rid: str) -> None:
+    """Link an object to its canonical owning team, when that team exists."""
+    obj = await context.require(rid)
+    ownership = TEAM_OWNERSHIP.get(obj.object_type)
+    if ownership is None:
+        return
+    link_type, kind = ownership
+    team = await _team_of_kind(context, kind)
+    if team is None:
+        return
+    await context.modify(rid, {"teamRid": team.rid})
+    context.link(link_type, team.rid, rid)
+
+
+async def _team_of_kind(context: EditContext, kind: str) -> Any | None:
+    """The active team of a kind, picked by teamNo so the choice is stable."""
+    teams = [
+        team
+        for team in await context.search("Team")
+        if team.properties.get("kind") == kind and team.properties.get("status") != "inactive"
+    ]
+    if not teams:
+        return None
+    return min(teams, key=lambda team: str(team.properties.get("teamNo") or ""))
 
 
 async def next_no(context: EditContext, object_type: str, prefix: str) -> str:
@@ -67,6 +107,7 @@ async def bump_warehouse_stock(
     )
     context.link("batchWarehouseStock", batch.rid, stock_rid)
     context.link("productWarehouseStock", product_rid, stock_rid)
+    await assign_owning_team(context, stock_rid)
 
 
 async def bump_outlet_stock(

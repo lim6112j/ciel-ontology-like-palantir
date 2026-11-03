@@ -110,6 +110,8 @@ export interface BatchProperties {
   bottledQty?: number;
   /** 상태 */
   status: "fermenting" | "aging" | "ready" | "shipped" | "wasted";
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface Batch {
@@ -135,6 +137,8 @@ export interface CustomerProperties {
   status: "active" | "suspended";
   /** 거래시작일 */
   openedOn?: string;
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface Customer {
@@ -226,6 +230,8 @@ export interface RawMaterialProperties {
   reorderPoint: number;
   /** 공급처 */
   supplier?: string;
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface RawMaterial {
@@ -251,6 +257,8 @@ export interface SalesOrderProperties {
   totalAmount?: number;
   /** 비고 */
   note?: string;
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface SalesOrder {
@@ -307,6 +315,8 @@ export interface ShipmentProperties {
   status: "in_transit" | "delivered" | "cancelled";
   /** 도착일 */
   deliveredOn?: string;
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface Shipment {
@@ -336,12 +346,37 @@ export interface TankProperties {
   tempMaxC: number;
   /** 상태 */
   status: "idle" | "in_use" | "cleaning" | "maintenance";
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface Tank {
   rid: string;
   objectType: string;
   properties: TankProperties;
+  version?: number;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+/** 양조장 내 업무 팀. 배치·탱크·품질기록·재고·출하·주문·판매처·원자재의 담당 팀을 링크로 표현한다. */
+export interface TeamProperties {
+  /** 팀번호 */
+  teamNo: string;
+  /** 팀명 */
+  name: string;
+  /** 업무구분 */
+  kind: "양조" | "품질" | "포장" | "물류" | "영업" | "자재";
+  /** 상태 */
+  status: "active" | "inactive";
+  /** 편성일 */
+  since?: string;
+}
+
+export interface Team {
+  rid: string;
+  objectType: string;
+  properties: TeamProperties;
   version?: number;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -359,6 +394,8 @@ export interface TempReadingProperties {
   tempC: number;
   /** 단계 */
   stage: "fermentation" | "aging";
+  /** 담당팀 */
+  teamRid?: string;
   /** 범위내 */
   inRange: boolean;
 }
@@ -384,6 +421,8 @@ export interface WarehouseStockProperties {
   quantity: number;
   /** 갱신일 */
   updatedOn: string;
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface WarehouseStock {
@@ -407,6 +446,8 @@ export interface WasteRecordProperties {
   quantity: number;
   /** 사유 */
   reason: "quality" | "expiry" | "damage" | "other";
+  /** 담당팀 */
+  teamRid?: string;
 }
 
 export interface WasteRecord {
@@ -430,6 +471,7 @@ export const OBJECT_TYPE_NAMES = [
   "SalesOrderLine",
   "Shipment",
   "Tank",
+  "Team",
   "TempReading",
   "WarehouseStock",
   "WasteRecord",
@@ -448,6 +490,7 @@ export type ObjectPropertiesByName = {
   SalesOrderLine: SalesOrderLineProperties;
   Shipment: ShipmentProperties;
   Tank: TankProperties;
+  Team: TeamProperties;
   TempReading: TempReadingProperties;
   WarehouseStock: WarehouseStockProperties;
   WasteRecord: WasteRecordProperties;
@@ -465,6 +508,7 @@ export type ObjectByName = {
   SalesOrderLine: SalesOrderLine;
   Shipment: Shipment;
   Tank: Tank;
+  Team: Team;
   TempReading: TempReading;
   WarehouseStock: WarehouseStock;
   WasteRecord: WasteRecord;

@@ -1,6 +1,6 @@
 # 온톨로지 스키마
 
-생성일: 2026-10-30
+생성일: 2026-11-03
 
 ## 오브젝트 타입
 
@@ -77,8 +77,9 @@
 | volumeL (양조량(L)) | decimal | O |  |
 | bottledQty (병입수량(병)) | integer |  |  |
 | status (상태) | enum | O | O |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `shipments` → Shipment, `readings` → TempReading, `stocks` → WarehouseStock, `wasteRecords` → WasteRecord, `product` → Product, `materials` → RawMaterial, `tank` → Tank
+링크: `shipments` → Shipment, `readings` → TempReading, `stocks` → WarehouseStock, `wasteRecords` → WasteRecord, `product` → Product, `materials` → RawMaterial, `tank` → Tank, `team` → Team
 
 ### Customer — 판매처
 
@@ -95,8 +96,9 @@
 | region (지역) | string |  |  |
 | status (상태) | enum | O | O |
 | openedOn (거래시작일) | date |  |  |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `orders` → SalesOrder, `outletStocks` → OutletStock, `shipments` → Shipment
+링크: `orders` → SalesOrder, `outletStocks` → OutletStock, `shipments` → Shipment, `team` → Team
 
 ### OutletStock — 판매처재고
 
@@ -154,8 +156,9 @@
 | currentStock (현재재고) | decimal | O |  |
 | reorderPoint (발주시점) | decimal | O |  |
 | supplier (공급처) | string |  |  |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `batches` → Batch
+링크: `batches` → Batch, `team` → Team
 
 ### SalesOrder — 판매주문
 
@@ -172,8 +175,9 @@
 | status (상태) | enum | O | O |
 | totalAmount (총액(원)) | bigint |  | O |
 | note (비고) | text |  |  |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `customer` → Customer, `lines` → SalesOrderLine, `shipments` → Shipment
+링크: `customer` → Customer, `lines` → SalesOrderLine, `shipments` → Shipment, `team` → Team
 
 ### SalesOrderLine — 주문라인
 
@@ -210,8 +214,9 @@
 | quantity (출하수량(병)) | integer | O |  |
 | status (상태) | enum | O | O |
 | deliveredOn (도착일) | date |  |  |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `batch` → Batch, `customer` → Customer, `order` → SalesOrder
+링크: `batch` → Batch, `customer` → Customer, `order` → SalesOrder, `team` → Team
 
 ### Tank — 발효조
 
@@ -230,8 +235,26 @@
 | tempMinC (조절최저온도(°C)) | decimal | O |  |
 | tempMaxC (조절최고온도(°C)) | decimal | O |  |
 | status (상태) | enum | O | O |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `batches` → Batch
+링크: `batches` → Batch, `team` → Team
+
+### Team — 팀
+
+양조장 내 업무 팀. 배치·탱크·품질기록·재고·출하·주문·판매처·원자재의 담당 팀을 링크로 표현한다.
+
+- 기본키: `teamNo`
+- 상태머신: active→inactive, inactive→active
+
+| 속성 | 타입 | 필수 | 인덱스 |
+|---|---|---|---|
+| teamNo (팀번호) | string | O |  |
+| name (팀명) | string | O | O |
+| kind (업무구분) | enum | O | O |
+| status (상태) | enum | O | O |
+| since (편성일) | date |  |  |
+
+링크: `batches` → Batch, `customers` → Customer, `materials` → RawMaterial, `orders` → SalesOrder, `shipments` → Shipment, `tanks` → Tank, `tempReadings` → TempReading, `warehouseStocks` → WarehouseStock, `wasteRecords` → WasteRecord
 
 ### TempReading — 온도측정
 
@@ -246,9 +269,10 @@
 | recordedAt (측정시각) | text | O |  |
 | tempC (측정온도(°C)) | decimal | O |  |
 | stage (단계) | enum | O | O |
+| teamRid (담당팀) | objectRef |  | O |
 | inRange (범위내) | boolean | O | O |
 
-링크: `batch` → Batch
+링크: `batch` → Batch, `team` → Team
 
 ### WarehouseStock — 창고재고
 
@@ -263,8 +287,9 @@
 | productRid (제품) | objectRef | O | O |
 | quantity (재고수량(병)) | integer | O |  |
 | updatedOn (갱신일) | date | O |  |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `batch` → Batch, `product` → Product
+링크: `batch` → Batch, `product` → Product, `team` → Team
 
 ### WasteRecord — 폐기기록
 
@@ -279,8 +304,9 @@
 | batchRid (배치) | objectRef | O | O |
 | quantity (폐기수량(병)) | integer | O |  |
 | reason (사유) | enum | O | O |
+| teamRid (담당팀) | objectRef |  | O |
 
-링크: `batch` → Batch
+링크: `batch` → Batch, `team` → Team
 
 ## 액션 타입
 
@@ -301,6 +327,7 @@
 - **ShipBatch** (배치 출하, 함수 기반) — 병입 완료 배치를 판매처로 출하하고 창고 재고를 차감한다.
 - **UpsertCustomer** (판매처 등록/수정, 함수 기반) — 판매처번호로 판매처를 신규 등록하거나 기존 정보를 갱신한다.
 - **UpsertProduct** (제품 등록/수정, 함수 기반) — SKU로 제품을 신규 등록하거나 기존 제품 정보를 갱신한다.
+- **UpsertTeam** (팀 등록/수정, 함수 기반) — 팀번호로 업무 팀을 신규 등록하거나 기존 정보를 갱신한다.
 - **WasteBatch** (배치 폐기, 함수 기반) — 배치를 전부 또는 일부 폐기하고 폐기기록을 남긴다.
 
 ## 함수
@@ -324,6 +351,7 @@
 - **tempDeviations** (read) — 최근 측정에서 목표온도 범위를 벗어난 배치 목록을 반환한다.
 - **upsertCustomer** (write) — 판매처번호로 판매처를 신규 등록하거나 기존 정보를 갱신한다.
 - **upsertProduct** (write) — SKU로 제품을 신규 등록하거나 기존 제품 정보를 갱신한다.
+- **upsertTeam** (write) — 팀번호로 업무 팀을 신규 등록하거나 기존 정보를 갱신한다.
 - **warehouseStock** (read) — 배치별 병입 재고를 소비기한순(FEFO)으로 반환한다.
 - **wasteBatch** (write) — 배치를 전부 또는 일부 폐기하고 폐기기록을 남긴다.
 - **wasteHistory** (read) — 기간·제품별 폐기 기록을 사유별 집계와 함께 반환한다.

@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamOrders
+    displayName: 담당주문
+    description: 영업팀이 접수한 판매주문.
+    fromObjectType: Team
+    fromApiName: orders
+    fromCardinality: many
+    toObjectType: SalesOrder
+    toApiName: team
+    toCardinality: one

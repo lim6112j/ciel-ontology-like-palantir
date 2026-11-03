@@ -83,6 +83,12 @@ properties:
     required: true
     indexed: true
     defaultValue: fermenting
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
 stateMachine:
   property: status
   initial: fermenting

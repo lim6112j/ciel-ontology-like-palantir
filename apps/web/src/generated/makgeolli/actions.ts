@@ -188,6 +188,18 @@ export interface UpsertProductParams {
   active?: boolean;
 }
 
+/** 팀번호로 업무 팀을 신규 등록하거나 기존 정보를 갱신한다. */
+export interface UpsertTeamParams {
+  /** 팀번호 */
+  teamNo: string;
+  /** 팀명 */
+  name: string;
+  /** 업무구분 */
+  kind: "양조" | "품질" | "포장" | "물류" | "영업" | "자재";
+  /** 편성일 */
+  since?: string;
+}
+
 /** 배치를 전부 또는 일부 폐기하고 폐기기록을 남긴다. */
 export interface WasteBatchParams {
   /** 배치 */
@@ -218,6 +230,7 @@ export const ACTION_NAMES = [
   "ShipBatch",
   "UpsertCustomer",
   "UpsertProduct",
+  "UpsertTeam",
   "WasteBatch",
 ] as const;
 export type ActionName = (typeof ACTION_NAMES)[number];
@@ -240,5 +253,6 @@ export interface ActionParamsByName {
   ShipBatch: ShipBatchParams;
   UpsertCustomer: UpsertCustomerParams;
   UpsertProduct: UpsertProductParams;
+  UpsertTeam: UpsertTeamParams;
   WasteBatch: WasteBatchParams;
 }

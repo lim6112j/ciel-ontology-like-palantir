@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamWaste
+    displayName: 담당폐기
+    description: 품질관리팀이 처리한 배치 폐기 기록.
+    fromObjectType: Team
+    fromApiName: wasteRecords
+    fromCardinality: many
+    toObjectType: WasteRecord
+    toApiName: team
+    toCardinality: one

@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamMaterials
+    displayName: 담당원자재
+    description: 자재관리팀이 조달·관리하는 원자재.
+    fromObjectType: Team
+    fromApiName: materials
+    fromCardinality: many
+    toObjectType: RawMaterial
+    toApiName: team
+    toCardinality: one

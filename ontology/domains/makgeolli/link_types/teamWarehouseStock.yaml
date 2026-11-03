@@ -1,0 +1,10 @@
+linkTypes:
+  - apiName: teamWarehouseStock
+    displayName: 담당창고재고
+    description: 포장팀이 관리하는 병입 재고.
+    fromObjectType: Team
+    fromApiName: warehouseStocks
+    fromCardinality: many
+    toObjectType: WarehouseStock
+    toApiName: team
+    toCardinality: one

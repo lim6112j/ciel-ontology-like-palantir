@@ -55,6 +55,12 @@ properties:
     apiName: deliveredOn
     displayName: 도착일
     type: date
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
 stateMachine:
   property: status
   initial: in_transit

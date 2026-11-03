@@ -12,8 +12,10 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ontology_runtime.domains.makgeolli.seed.generator import SeedGenerator
+from ontology_runtime.errors import ConflictError
 from ontology_runtime.registry import SchemaRegistry
 from ontology_runtime.runtime import Runtime
+from ontology_runtime.store.link_store import LinkStore
 
 TODAY = dt.date(2026, 10, 25)
 
@@ -49,6 +51,7 @@ async def test_seed_creates_full_brewery_data(
 
     assert summary.products == 10
     assert summary.customers == 5
+    assert summary.teams == 6
     assert summary.tanks == 4
     assert summary.materials == 6
     assert summary.batches == 10
@@ -61,6 +64,7 @@ async def test_seed_creates_full_brewery_data(
     for object_type, expected in (
         ("Product", 10),
         ("Customer", 5),
+        ("Team", 6),
         ("Tank", 4),
         ("RawMaterial", 6),
         ("Batch", 10),
@@ -79,6 +83,210 @@ async def test_seed_is_deterministic(registry: SchemaRegistry, session: AsyncSes
         await session.commit()
         counts.append(summary.to_dict())
     assert counts[0] == counts[1]
+
+
+# --- teams ---------------------------------------------------------------------
+
+
+async def test_seed_assigns_every_object_to_a_team(
+    registry: SchemaRegistry, session: AsyncSession
+) -> None:
+    runtime = await _seeded_session(registry, session)
+    links = LinkStore(registry, session)
+    teams = {team.properties["kind"]: team for team in (await runtime.sets.search("Team")).objects}
+    assert set(teams) == {"양조", "품질", "포장", "물류", "영업", "자재"}
+
+    for object_type, kind in (
+        ("Batch", "양조"),
+        ("Tank", "양조"),
+        ("TempReading", "품질"),
+        ("WasteRecord", "품질"),
+        ("WarehouseStock", "포장"),
+        ("Shipment", "물류"),
+        ("SalesOrder", "영업"),
+        ("Customer", "영업"),
+        ("RawMaterial", "자재"),
+    ):
+        objects = (await runtime.sets.search(object_type, page_size=50)).objects
+        assert objects, object_type
+        team = teams[kind]
+        for obj in objects:
+            assert obj.properties["teamRid"] == team.rid, object_type
+        view = next(v for v in registry.links_of("Team") if v.target_type == object_type)
+        assert len(await links.targets(view, team.rid)) == len(objects), object_type
+
+
+async def test_an_object_answers_to_exactly_one_team(
+    registry: SchemaRegistry, session: AsyncSession
+) -> None:
+    runtime = await _seeded_session(registry, session)
+    links = LinkStore(registry, session)
+    batch = (await runtime.sets.search("Batch", page_size=1)).objects[0]
+    teams = (await runtime.sets.search("Team")).objects
+    brewing = next(team for team in teams if team.properties["kind"] == "양조")
+    quality = next(team for team in teams if team.properties["kind"] == "품질")
+
+    with pytest.raises(ConflictError):
+        await links.create("teamBatches", quality.rid, batch.rid)
+
+    view = registry.link_on("Team", "batches")
+    assert batch.rid in [obj.rid for obj in await links.targets(view, brewing.rid)]
+
+
+async def test_upsert_team_creates_then_updates(
+    registry: SchemaRegistry, session: AsyncSession
+) -> None:
+    runtime = await _seeded_session(registry, session)
+    result = await runtime.apply(
+        "UpsertTeam",
+        {"teamNo": "T90", "name": "연구개발팀", "kind": "품질", "since": "2026-01-05"},
+        actor="manager01",
+    )
+    assert result.status == "succeeded"
+
+    created = await runtime.sets.search(
+        "Team", filter={"field": "teamNo", "op": "eq", "value": "T90"}
+    )
+    assert created.total == 1
+    assert created.objects[0].properties["kind"] == "품질"
+    assert created.objects[0].properties["since"] == "2026-01-05"
+
+    result = await runtime.apply(
+        "UpsertTeam",
+        {"teamNo": "T90", "name": "품질연구팀", "kind": "품질"},
+        actor="manager01",
+    )
+    assert result.status == "succeeded"
+
+    updated = await runtime.sets.search(
+        "Team", filter={"field": "teamNo", "op": "eq", "value": "T90"}
+    )
+    assert updated.total == 1, "팀번호는 유지하고 정보만 갱신한다"
+    assert updated.objects[0].properties["name"] == "품질연구팀"
+
+
+# --- write path -----------------------------------------------------------------
+
+
+async def test_write_path_links_new_objects_to_their_team(
+    registry: SchemaRegistry, session: AsyncSession
+) -> None:
+    """Everything the single write path creates carries its owning team."""
+    runtime = await _seeded_session(registry, session)
+    links = LinkStore(registry, session)
+    teams = {team.properties["kind"]: team for team in (await runtime.sets.search("Team")).objects}
+    product = (await runtime.sets.search("Product", page_size=1)).objects[0]
+    customer = (await runtime.sets.search("Customer", page_size=1)).objects[0]
+
+    batch_run = await runtime.apply(
+        "CreateBatch",
+        {"product": product.rid, "brewDate": TODAY.isoformat(), "volumeL": 300},
+        actor="brewer01",
+    )
+    assert batch_run.status == "succeeded"
+    batch = (
+        await runtime.sets.search(
+            "Batch", filter={"field": "batchNo", "op": "eq", "value": "BATCH-00011"}
+        )
+    ).objects[0]
+    assert batch.properties["teamRid"] == teams["양조"].rid
+    view = registry.link_on("Team", "batches")
+    assert batch.rid in [obj.rid for obj in await links.targets(view, teams["양조"].rid)]
+
+    reading_run = await runtime.apply(
+        "RecordTempReading",
+        {"batch": batch.rid, "tempC": 12.0, "stage": "fermentation"},
+        actor="brewer01",
+    )
+    assert reading_run.status == "succeeded"
+    reading = (
+        await runtime.sets.search(
+            "TempReading", filter={"field": "batchRid", "op": "eq", "value": batch.rid}
+        )
+    ).objects[0]
+    assert reading.properties["teamRid"] == teams["품질"].rid
+
+    order_run = await runtime.apply(
+        "CreateSalesOrder",
+        {
+            "customer": customer.rid,
+            "orderDate": TODAY.isoformat(),
+            "lines": [{"productRid": product.rid, "cases": 6}],
+        },
+        actor="sales01",
+    )
+    assert order_run.status == "succeeded"
+    order = (
+        await runtime.sets.search(
+            "SalesOrder", filter={"field": "status", "op": "eq", "value": "draft"}
+        )
+    ).objects[0]
+    assert order.properties["teamRid"] == teams["영업"].rid
+
+
+async def test_write_path_links_bottling_and_shipping_to_their_team(
+    registry: SchemaRegistry, session: AsyncSession
+) -> None:
+    """Bottling hands stock to packaging; shipping hands it to logistics."""
+    runtime = await _seeded_session(registry, session)
+    teams = {team.properties["kind"]: team for team in (await runtime.sets.search("Team")).objects}
+    customer = (await runtime.sets.search("Customer", page_size=1)).objects[0]
+
+    aging = (
+        await runtime.sets.search(
+            "Batch", filter={"field": "status", "op": "eq", "value": "aging"}, page_size=1
+        )
+    ).objects[0]
+    result = await runtime.apply("CompleteAging", {"batch": aging.rid}, actor="brewer01")
+    assert result.status == "succeeded"
+    stock = (
+        await runtime.sets.search(
+            "WarehouseStock", filter={"field": "batchRid", "op": "eq", "value": aging.rid}
+        )
+    ).objects[0]
+    assert stock.properties["teamRid"] == teams["포장"].rid
+
+    ready = (
+        await runtime.sets.search(
+            "Batch", filter={"field": "status", "op": "eq", "value": "ready"}, page_size=1
+        )
+    ).objects[0]
+    result = await runtime.apply(
+        "ShipBatch",
+        {
+            "batch": ready.rid,
+            "customer": customer.rid,
+            "quantity": 5,
+            "shipDate": TODAY.isoformat(),
+        },
+        actor="manager01",
+    )
+    assert result.status == "succeeded"
+    shipments = (
+        await runtime.sets.search(
+            "Shipment", filter={"field": "batchRid", "op": "eq", "value": ready.rid}
+        )
+    ).objects
+    assert shipments, "출하가 생성되어야 한다"
+    for shipment in shipments:
+        assert shipment.properties["teamRid"] == teams["물류"].rid
+
+
+async def test_upsert_team_rejects_unknown_kind(
+    registry: SchemaRegistry, session: AsyncSession
+) -> None:
+    runtime = await _seeded_session(registry, session)
+    result = await runtime.apply(
+        "UpsertTeam",
+        {"teamNo": "T91", "name": "알수없는팀", "kind": "마케팅"},
+        actor="manager01",
+    )
+    assert result.status == "failed"
+
+    remaining = await runtime.sets.search(
+        "Team", filter={"field": "teamNo", "op": "eq", "value": "T91"}
+    )
+    assert remaining.total == 0
 
 
 # --- batch lifecycle -----------------------------------------------------------

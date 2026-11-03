@@ -57,6 +57,12 @@ properties:
     required: true
     indexed: true
     defaultValue: idle
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
 stateMachine:
   property: status
   initial: idle

@@ -47,3 +47,9 @@ properties:
     displayName: 공급처
     type: string
     maxLength: 120
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true

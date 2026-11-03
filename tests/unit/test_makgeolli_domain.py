@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from ontology_runtime.meta.link_type import Cardinality
 from ontology_runtime.registry import SchemaRegistry
 
 EXPECTED_OBJECT_TYPES = {
@@ -18,6 +19,7 @@ EXPECTED_OBJECT_TYPES = {
     "SalesOrderLine",
     "Shipment",
     "Tank",
+    "Team",
     "TempReading",
     "WasteRecord",
     "WarehouseStock",
@@ -55,6 +57,8 @@ def test_inverse_links_are_derived(registry: SchemaRegistry) -> None:
     assert registry.link_on("SalesOrder", "lines").is_forward is True
     assert registry.link_on("SalesOrderLine", "order").is_forward is False
     assert registry.link_on("TempReading", "batch").is_forward is False
+    assert registry.link_on("Team", "batches").is_forward is True
+    assert registry.link_on("Batch", "team").is_forward is False
 
 
 def test_every_object_type_has_at_least_one_link(registry: SchemaRegistry) -> None:
@@ -85,6 +89,37 @@ def test_state_machines_are_complete(registry: SchemaRegistry) -> None:
     assert tank.allows("in_use", "cleaning")
 
 
+#: Object types a team owns, one responsible team per object.
+TEAM_OWNED_TYPES = {
+    "Batch",
+    "Tank",
+    "TempReading",
+    "WasteRecord",
+    "WarehouseStock",
+    "Shipment",
+    "SalesOrder",
+    "Customer",
+    "RawMaterial",
+}
+
+
+def test_team_ownership_links_are_consistent(registry: SchemaRegistry) -> None:
+    owned = {
+        link.toObjectType: link
+        for link in registry.bundle.link_types.values()
+        if link.fromObjectType == "Team"
+    }
+    assert set(owned) == TEAM_OWNED_TYPES
+    for object_type, link in owned.items():
+        # A team runs many objects, but an object answers to exactly one team.
+        assert link.fromCardinality == Cardinality.MANY
+        assert link.toCardinality == Cardinality.ONE
+        team_ref = registry.object_type(object_type).properties.get("teamRid")
+        assert team_ref is not None, f"{object_type} has no teamRid property"
+        assert team_ref.objectType == "Team"
+        assert registry.link_on(object_type, "team").link.apiName == link.apiName
+
+
 def test_agent_writable_actions_exist(registry: SchemaRegistry) -> None:
     proposable = {
         name for name, action in registry.bundle.action_types.items() if action.agentProposable
@@ -98,6 +133,8 @@ def test_agent_writable_actions_exist(registry: SchemaRegistry) -> None:
     # Approval itself must never be agent-proposable.
     assert "ApproveActionProposal" not in proposable
     assert "RejectActionProposal" not in proposable
+    # Teams are master data: operators only.
+    assert "UpsertTeam" not in proposable
 
 
 def test_function_backed_actions_resolve(registry: SchemaRegistry) -> None:

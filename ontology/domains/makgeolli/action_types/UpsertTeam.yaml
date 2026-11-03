@@ -1,0 +1,27 @@
+apiName: UpsertTeam
+displayName: 팀 등록/수정
+description: 팀번호로 업무 팀을 신규 등록하거나 기존 정보를 갱신한다.
+agentProposable: false
+allowedRoles: [manager]
+parameters:
+  teamNo:
+    apiName: teamNo
+    type: string
+    displayName: 팀번호
+  name:
+    apiName: name
+    type: string
+    displayName: 팀명
+  kind:
+    apiName: kind
+    type: enum
+    values: [양조, 품질, 포장, 물류, 영업, 자재]
+    displayName: 업무구분
+  since:
+    apiName: since
+    type: date
+    displayName: 편성일
+    required: false
+rules:
+  - type: runFunction
+    function: upsertTeam

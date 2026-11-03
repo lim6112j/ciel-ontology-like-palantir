@@ -1,0 +1,45 @@
+apiName: Team
+displayName: 팀
+pluralDisplayName: 팀
+description: 양조장 내 업무 팀. 배치·탱크·품질기록·재고·출하·주문·판매처·원자재의 담당 팀을 링크로 표현한다.
+primaryKey: teamNo
+properties:
+  teamNo:
+    apiName: teamNo
+    displayName: 팀번호
+    type: string
+    required: true
+    unique: true
+    maxLength: 32
+  name:
+    apiName: name
+    displayName: 팀명
+    type: string
+    required: true
+    indexed: true
+    maxLength: 120
+  kind:
+    apiName: kind
+    displayName: 업무구분
+    type: enum
+    values: [양조, 품질, 포장, 물류, 영업, 자재]
+    required: true
+    indexed: true
+  status:
+    apiName: status
+    displayName: 상태
+    type: enum
+    values: [active, inactive]
+    required: true
+    indexed: true
+    defaultValue: active
+  since:
+    apiName: since
+    displayName: 편성일
+    type: date
+stateMachine:
+  property: status
+  initial: active
+  transitions:
+    - {from: active, to: inactive}
+    - {from: inactive, to: active}

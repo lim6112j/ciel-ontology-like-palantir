@@ -36,6 +36,12 @@ properties:
     displayName: 갱신일
     type: date
     required: true
+  teamRid:
+    apiName: teamRid
+    displayName: 담당팀
+    type: objectRef
+    objectType: Team
+    indexed: true
 indexes:
   - name: ix_makgeolli_warehousestock_batch
     properties: [batchRid]
